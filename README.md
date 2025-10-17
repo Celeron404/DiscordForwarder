@@ -134,10 +134,10 @@ Below is an example configuration with inline explanations.
 3. **Add keywords for this section** — words that trigger forwarding:
 
    ```text
-   ?fw addkeyword organization_section_name1 help
+   ?fw addkeyword organization_section_name1 urgent
    ?fw addkeyword organization_section_name1 base
    ?fw addkeyword organization_section_name1 tow
-   ?fw addkeyword organization_section_name2 help
+   ?fw addkeyword organization_section_name2 urgent
    ?fw addkeyword organization_section_name2 police
    ```
 
