@@ -147,7 +147,7 @@ async def unsubscribe(ctx, section_name: str):
     await ctx.send(f"You have been unsubscribed from DM alerts in section `{section_name}`.")
 
 @is_admin()
-@bot.command(name="listsubs", aliases=["ls", "lsub"])
+@bot.command(name="listsubs", aliases=["lsub"])
 async def listsubs(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
@@ -160,6 +160,32 @@ async def listsubs(ctx, section_name: str):
         member = ctx.guild.get_member(int(uid))
         users.append(member.display_name if member else uid)
     await ctx.send("Subscribers: " + ", ".join(users))
+
+@is_admin()
+@bot.command(name="listsections", aliases=["lsec"])
+async def listsections(ctx):
+    guild_conf = ensure_guild(ctx.guild.id)
+    sections = guild_conf["sections"]
+    if not sections:
+        await ctx.send("Section list is empty.")
+        return
+    await ctx.send("Sections list: `" + "`, `".join(sections.keys()) + "`")
+
+@is_admin()
+@bot.command(name="remsection", aliases=["rsec", "remsec"])
+async def remsection(ctx, section_name: str):
+    guild_conf = ensure_guild(ctx.guild.id)
+    sections = guild_conf["sections"]
+    if not sections:
+        await ctx.send("Section list is empty.")
+        return
+    if section_name not in sections:
+        await ctx.send(f"Section `{section_name}` does not exist.")
+        return
+    sections.pop(section_name)
+    save_data(DATA)
+    await ctx.send(f"Section `{section_name}` removed.")
+
 
 # -----------------------
 # Message monitoring logic
