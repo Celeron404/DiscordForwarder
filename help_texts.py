@@ -28,6 +28,7 @@ Aliases: `rs`, `rmsrc`
     
 `?fw setforward <section_name> #<channel_source> #<channel_destination>`
 Set forwarding destination channel for a source channel for specific section. **(Bot Admin Only)**
+If destination not provided → disable forwarding
 Aliases: `sf`, `setfw`
     
 `?fw setmode <section_name> <forward|dm|all>`
@@ -107,7 +108,9 @@ COMMAND_HELP = {
             "`?fw setforward <section_name> #<channel_source> #<channel_destination>` — Set a forwarding destination for specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw setforward org1 #general #forwarded`\n"
                   "Now all messages from channel `#general` will be forwarded to channel `#forwarded` for section `org1`.\n"
-                  "(in case if addkeyword and addsource already configured)",
+                  "(in case if addkeyword and addsource already configured)\n"
+                  "If destination is not provided → disable forwarding\n"
+                  "Example: `?fw setforward org1 #general`",
         "aliases": ["sf", "setfw"]
     },
 
