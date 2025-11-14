@@ -1,5 +1,6 @@
 ﻿# bot.py
 import discord
+import traceback
 from discord.ext import commands
 
 from admins_ids import ADMIN_IDS
@@ -234,8 +235,11 @@ async def on_command_error(ctx, error):
         await ctx.send("Incorrect command usage. Please check the arguments.")
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("You do not have permission to run this command.")
+    elif isinstance(error, commands.CheckFailure):
+        return
     else:
-        print("Command error:", error)
+        print(f"Command error: {error} \n{traceback.format_exception(error)}")
+        await ctx.send(f"Command error: {error}")
 
 # -----------------------
 # Help command
