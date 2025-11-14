@@ -194,7 +194,7 @@ async def remsection(ctx, section_name: str):
 async def on_message(message):
     await bot.process_commands(message)
 
-    if message.author.bot or not message.guild:
+    if not message.guild:
         return
 
     guild_conf = ensure_guild(message.guild.id)
