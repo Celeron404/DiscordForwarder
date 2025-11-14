@@ -44,7 +44,15 @@ Aliases: `unsub`
     
 `?fw listsubs <section_name>`
 List all DM subscribers for specific section. **(Bot Admin Only)**
-Aliases: `ls`, `lsub`
+Aliases: `lsub`
+    
+`?fw listsections`
+List all sections. **(Bot Admin Only)**
+Aliases: `lsec`
+    
+`?fw remsection <section_name>`
+Remove a section. **(Bot Admin Only)**
+Aliases: `rsec`, `remsec`
     
 `?fw help` — Shows this message.
 
@@ -55,7 +63,7 @@ Aliases: `ls`, `lsub`
 COMMAND_HELP = {
     "addkeyword": {
         "help":
-            "`?fw addkeyword <section_name> <keyword>` — Add a new keyword for specific section.\n"
+            "`?fw addkeyword <section_name> <keyword>` — Add a new keyword for specific section. **(Bot Admin Only)**\n"
                       "Example: `?fw addkeyword org1 urgent`\n"
                       "Now all messages containing the keyword `urgent` will be forwarded for section `org1`\n"
                       "(in case if addsource and setforward already configured).",
@@ -64,7 +72,7 @@ COMMAND_HELP = {
 
     "remkeyword": {
         "help":
-            "`?fw remkeyword <section_name> <keyword>` — Remove an existing keyword from specific section.\n"
+            "`?fw remkeyword <section_name> <keyword>` — Remove an existing keyword from specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw remkeyword org1 help`\n"
                   "Now all messages containing the keyword `help` will no longer be forwarded for section `org1`",
         "aliases": ["rkw", "remkw"]
@@ -79,7 +87,7 @@ COMMAND_HELP = {
 
     "addsource": {
         "help":
-            "`?fw addsource <section_name> #<channel>` — Add a source channel to monitor for specific section.\n"
+            "`?fw addsource <section_name> #<channel>` — Add a source channel to monitor for specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw addsource org1 #general`\n"
                   "Now all messages from channel `#general` will be monitored for section `org1`\n"
                   "And if `setforward` is configured, then all messages containing configured keyword will be forwarded to configured channel for section `org1`.",
@@ -88,7 +96,7 @@ COMMAND_HELP = {
 
     "remsource": {
         "help":
-            "`?fw remsource <section_name> #<channel>` — Remove a monitored channel from specific section.\n"
+            "`?fw remsource <section_name> #<channel>` — Remove a monitored channel from specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw remsource org1 #general`\n"
                   "Now all messages from channel `#general` will no longer be monitored for section `org1`.",
         "aliases": ["rs", "rmsrc"]
@@ -96,7 +104,7 @@ COMMAND_HELP = {
 
     "setforward": {
         "help":
-            "`?fw setforward <section_name> #<channel_source> #<channel_destination>` — Set a forwarding destination for specific section.\n"
+            "`?fw setforward <section_name> #<channel_source> #<channel_destination>` — Set a forwarding destination for specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw setforward org1 #general #forwarded`\n"
                   "Now all messages from channel `#general` will be forwarded to channel `#forwarded` for section `org1`.\n"
                   "(in case if addkeyword and addsource already configured)",
@@ -105,7 +113,7 @@ COMMAND_HELP = {
 
     "setmode": {
         "help":
-            "`?fw setmode <section_name> <forward|dm|all>` — Set the forwarding mode for specific section.\n"
+            "`?fw setmode <section_name> <forward|dm|all>` — Set the forwarding mode for specific section. **(Bot Admin Only)**\n"
                   "`forward` - (Default) forward messages to configured channel for section.\n"
                   "`dm` - send DM alerts to subscribers for section.\n"
                   "`all` - forward messages to configured channel and send DM alerts to subscribers for section.\n"
@@ -129,8 +137,23 @@ COMMAND_HELP = {
 
     "listsubs": {
         "help":
-            "`?fw listsubs <section_name>` — List all DM subscribers for specific section (admin only).\n" 
+            "`?fw listsubs <section_name>` — List all DM subscribers for specific section. **(Bot Admin Only)**\n" 
                   "Example: `?fw listsubs org1 help`",
-        "aliases": ["ls", "lsub"]
+        "aliases": ["lsub"]
+    },
+
+    "listsections": {
+        "help":
+            "`?fw listsections` — List all sections. **(Bot Admin Only)**\n" 
+                  "Example: `?fw listsections`",
+        "aliases": ["lsec"]
+    },
+
+    "remsection": {
+        "help":
+            "`?fw remsection` — Remove a section. **(Bot Admin Only)**\n" 
+                  "Example: `?fw remsection org1`\n"
+                  "Now section `org1` was removed.",
+        "aliases": ["rsec", "remsec"]
     }
 }

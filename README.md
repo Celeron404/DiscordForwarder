@@ -197,6 +197,21 @@ Below is an example configuration with inline explanations.
    ```text
    ?fw organization_section_name1 unsubscribe         # stop receiving DMs
    ```
+   
+10. **Get list of all sections (Bot Admin only)**:
+
+   ```text
+   ?fw listsections
+   ```
+   Shows all sections created in this guild.
+
+11. **Remove section (Bot Admin only)**:
+
+   ```text
+   ?fw remsection organization_section_name1
+   ```
+   Removes section `organization_section_name1`.<br>
+   *Reminder: If you want to add a section, no need to use specific commands. A new section will be created automatically when first using commands working with section, for example `?fw addkeyword`, `?fw addsource`.*
 
 ---
 
