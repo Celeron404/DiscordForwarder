@@ -16,7 +16,7 @@ def is_admin():
         if ctx.author.id in ADMIN_IDS.values():
             return True
         else:
-            await ctx.send(f"User with Id `{ctx.author.id}` is not in Forwarder Bot admin list. Ask admin to add you to the list to use the command.")
+            await ctx.send(f"User with ID `{ctx.author.id}` is not in Forwarder Bot admin list. Ask admin to add you to the list to use the command.")
             return False
     return commands.check(predicate)
 

@@ -17,6 +17,7 @@ Supports **multiple independent configurations per server**, making it ideal for
 * **Multi-channel support** — monitor multiple source channels simultaneously.
 * **Custom subscriber notifications** — notify specific users privately.
 * **Persistent configuration** — settings stored in `data.json`.
+* **Admin commands** — only approved users can use protected commands.
 
 ---
 
@@ -82,13 +83,14 @@ Below is an example configuration with inline explanations.
 ## 🧠 Terminology
 
 | Term            | Meaning                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------- |
+|-----------------|---------------------------------------------------------------------------------------------------------|
 | **Guild**       | A Discord server. Each guild has its own configuration.                                                 |
 | **Section**     | A subgroup inside a guild’s config. Used to isolate multiple organizations or teams sharing one server. |
 | **Source**      | Channel where messages are read.                                                                        |
 | **Destination** | Channel where messages are forwarded.                                                                   |
 | **Keyword**     | A trigger word that activates forwarding.                                                               |
 | **Subscriber**  | User who receives forwarded messages via DM.                                                            |
+| **Admin**       | User who was added to bot admin list and can use protected commands.                                    |
 
 ---
 
@@ -120,10 +122,19 @@ Below is an example configuration with inline explanations.
 
 ## ⚡ Example Usage
 
-1. **Add a new section for your organization**
+1. **Add your Discord ID to the bot admin list**: Type some protected command, you will see your Discord ID:
+   ```text
+   ?fw addsource organization_section_name1 #channel_name1
+   
+   Forwarder Bot: User with ID 123456789012345678 is not in Forwarder Bot admin list. Ask admin to add you to the list.
+   ```
+   Ask bot admin to add your ID to the list in `admins_ids.py` file. After that you will be able to use protected commands.
+
+
+2. **Add a new section for your organization**
    (Handled automatically when first using commands within the guild.)
 
-2. **Add source channels** — channels the bot should monitor:
+2. **Add source channels (Bot Admin only)** — channels the bot should monitor:
 
    ```text
    ?fw addsource organization_section_name1 #channel_name1
@@ -131,7 +142,7 @@ Below is an example configuration with inline explanations.
    ?fw addsource organization_section_name2 #channel_name1
    ```
 
-3. **Add keywords for this section** — words that trigger forwarding:
+3. **Add keywords for this section (Bot Admin only)** — words that trigger forwarding:
 
    ```text
    ?fw addkeyword organization_section_name1 urgent
@@ -141,7 +152,7 @@ Below is an example configuration with inline explanations.
    ?fw addkeyword organization_section_name2 police
    ```
 
-4. **Set forwarding destinations** — where messages matching keywords will be forwarded:
+4. **Set forwarding destinations (Bot Admin only)** — where messages matching keywords will be forwarded:
 
    ```text
    ?fw setforward organization_section_name1 #channel_name1 #forwarded_channel1
@@ -149,7 +160,7 @@ Below is an example configuration with inline explanations.
    ?fw setforward organization_section_name2 #channel_name1 #forwarded_channel2
    ```
 
-5. **Set mode** — choose how messages are delivered:
+5. **Set mode (Bot Admin only)** — choose how messages are delivered:
 
    ```text
    ?fw setmode organization_section_name1 all       # forward to channel + DM subscribers
@@ -175,7 +186,7 @@ Below is an example configuration with inline explanations.
    * Skip messages without matching keywords
    
 
-8. **See subscriptions (admin only)**:
+8. **See subscriptions (Bot Admin only)**:
 
    ```text
    ?fw organization_section_name1 listsubs            # view all current subscribers

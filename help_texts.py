@@ -5,29 +5,51 @@ These texts are used for ?fw help and ?fw <command> help.
 """
 
 GENERAL_HELP = """
-\n**Discord Forward Bot Commands**
-`?fw addkeyword <section_name> <keyword>` — Add a new keyword to trigger forwarding for specific section.
-    \t\t**Aliases:** `akw`, `addkw`
-`?fw remkeyword <section_name> <keyword>` — Remove a keyword from specific section.
-    \t\t**Aliases:** `rkw`, `remkw`
-`?fw listkeywords <section_name>` — List all keywords for specific section.
-    \t\t**Aliases:** `lkw`, `lskw`
-`?fw addsource <section_name> #<channel>` — Add a source channel to monitor for specific section.
-    \t\t**Aliases:** `as`, `addsrc`
-`?fw remsource <section_name> #<channel>` — Remove a monitored channel from specific section.
-    \t\t**Aliases:** `rs`, `rmsrc`
-`?fw setforward <section_name> #<channel_source> #<channel_destination>` — Set forwarding destination channel for a source channel for specific section.
-    \t\t**Aliases:** `sf`, `setfw`
-`?fw setmode <section_name> <forward|dm|all>` — Set the forwarding mode for specific section.
-    \t\t**Aliases:** `sm`, `setmd`
-`?fw subscribe <section_name>` — Subscribe to DM alerts for keywords for specific section.
-    \t\t**Aliases:** `sub`
-`?fw unsubscribe <section_name>` — Unsubscribe from DM alerts from specific section.
-    \t\t**Aliases:** `unsub`
-`?fw listsubs <section_name>` — List all DM subscribers for specific section (admin only).
-    \t\t**Aliases:** `ls`, `lsub`
+**Discord Forward Bot Commands**
+`?fw addkeyword <section_name> <keyword>`
+Add a new keyword to trigger forwarding for specific section. **(Bot Admin Only)**
+Aliases: `akw`, `addkw`
+    
+`?fw remkeyword <section_name> <keyword>`
+Remove a keyword from specific section. **(Bot Admin Only)**
+Aliases: `rkw`, `remkw`
+    
+`?fw listkeywords <section_name>`
+List all keywords for specific section.
+Aliases: `lkw`, `lskw`
+    
+`?fw addsource <section_name> #<channel>`
+Add a source channel to monitor for specific section. **(Bot Admin Only)**
+Aliases: `as`, `addsrc`
+    
+`?fw remsource <section_name> #<channel>`
+Remove a monitored channel from specific section. **(Bot Admin Only)**
+Aliases: `rs`, `rmsrc`
+    
+`?fw setforward <section_name> #<channel_source> #<channel_destination>`
+Set forwarding destination channel for a source channel for specific section. **(Bot Admin Only)**
+Aliases: `sf`, `setfw`
+    
+`?fw setmode <section_name> <forward|dm|all>`
+Set the forwarding mode for specific section. **(Bot Admin Only)**
+Aliases: `sm`, `setmd`
+    
+`?fw subscribe <section_name>`
+Subscribe to DM alerts for keywords for specific section.
+Aliases: `sub`
+    
+`?fw unsubscribe <section_name>`
+Unsubscribe from DM alerts from specific section.
+Aliases: `unsub`
+    
+`?fw listsubs <section_name>`
+List all DM subscribers for specific section. **(Bot Admin Only)**
+Aliases: `ls`, `lsub`
+    
 `?fw help` — Shows this message.
+
 `?fw help <command>` — Shows help for specific command.
+
 """
 
 COMMAND_HELP = {
