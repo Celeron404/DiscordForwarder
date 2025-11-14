@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 
+from admins_ids import ADMIN_IDS
 from config import PREFIX, DISCORD_TOKEN, INTENTS
 from help_texts import GENERAL_HELP, COMMAND_HELP
 from data_utils import DATA, ensure_guild, ensure_section, save_data
@@ -9,9 +10,20 @@ from data_utils import DATA, ensure_guild, ensure_section, save_data
 bot = commands.Bot(command_prefix=PREFIX, intents=INTENTS, help_command=None)
 
 
+
+def is_admin():
+    async def predicate(ctx):
+        if ctx.author.id in ADMIN_IDS.values():
+            return True
+        else:
+            await ctx.send(f"User with Id `{ctx.author.id}` is not in Forwarder Bot admin list. Ask admin to add you to the list to use the command.")
+            return False
+    return commands.check(predicate)
+
 # -----------------------
 # Сommands
 # -----------------------
+@is_admin()
 @bot.command(name="addkeyword", aliases=["akw", "addkw"])
 async def addkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -24,6 +36,7 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
     save_data(DATA)
     await ctx.send(f"Added keyword: `{kw}` to section `{section_name}`")
 
+@is_admin()
 @bot.command(name="remkeyword", aliases=["rkw", "remkw"])
 async def remkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -46,6 +59,7 @@ async def listkeywords(ctx, section_name: str):
         return
     await ctx.send("Keywords: " + ", ".join(f"`{k}`" for k in kws))
 
+@is_admin()
 @bot.command(name="addsource", aliases=["as", "addsrc"])
 async def addsource(ctx, section_name: str, channel: discord.TextChannel):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -58,6 +72,7 @@ async def addsource(ctx, section_name: str, channel: discord.TextChannel):
     save_data(DATA)
     await ctx.send(f"Added {channel.mention} to monitored channels in section `{section_name}`.")
 
+@is_admin()
 @bot.command(name="remsource", aliases=["rs", "rmsrc"])
 async def remsource(ctx, section_name: str, channel: discord.TextChannel):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -72,6 +87,7 @@ async def remsource(ctx, section_name: str, channel: discord.TextChannel):
     save_data(DATA)
     await ctx.send(f"Removed {channel.mention} from monitored channels in section `{section_name}`.")
 
+@is_admin()
 @bot.command(name="setforward", aliases=["sf", "setfw"])
 async def setforward(ctx, section_name: str, source: discord.TextChannel, destination: discord.TextChannel=None):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -89,6 +105,7 @@ async def setforward(ctx, section_name: str, source: discord.TextChannel, destin
     save_data(DATA)
     await ctx.send(f"Messages from {source.mention} will be forwarded to {destination.mention} in section `{section_name}`.")
 
+@is_admin()
 @bot.command(name="setmode", aliases=["sm", "setmd"])
 async def setmode(ctx, section_name: str, mode: str):
     mode = mode.lower()
@@ -128,8 +145,8 @@ async def unsubscribe(ctx, section_name: str):
     save_data(DATA)
     await ctx.send(f"You have been unsubscribed from DM alerts in section `{section_name}`.")
 
+@is_admin()
 @bot.command(name="listsubs", aliases=["ls", "lsub"])
-@commands.has_guild_permissions(manage_guild=True)
 async def listsubs(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
@@ -246,7 +263,6 @@ async def help_command(ctx, *, cmd: str = None):
             await ctx.send(f"No help found for command `{cmd}`. Showing general help:\n{GENERAL_HELP}")
     else:
         await ctx.send(GENERAL_HELP)
-
 
 
 # -----------------------
