@@ -9,7 +9,7 @@ Supports **multiple independent configurations per server**, making it ideal for
 
 * **Keyword-based message forwarding** — automatically detect messages containing target words.
 * **Per-guild and per-section configuration** — each server can define multiple independent "sections" with their own filters and destinations.
-* **Multi-channel support** — monitor multiple source channels simultaneously.
+* **Multi-channel support** — monitor multiple source channels simultaneously as well as multiple destination channels.
 * **Persistent configuration** — settings stored in `data.json`.
 * **Admin commands** — only approved users can use protected commands.
 
@@ -44,20 +44,15 @@ Below is an example configuration with inline explanations.
         "sources": ["111111111111111111", "222222222222222222"],
         "_comment_sources": "IDs of channels to monitor",
 
-        "forward_map": {
-          "111111111111111111": "333333333333333333",
-          "222222222222222222": "444444444444444444"
-        },
-        "_comment_forward_map": "Maps source channels to destination channels"
+        "destinations": ["333333333333333333", "444444444444444444"],
+        "_comment_destinations": "IDs of channels where to forward messages from source channel with same index"
       },
 
       "org2": {
         "_comment": "Another section for organization #2",
         "keywords": ["urgent", "event"],
         "sources": ["111111111111111111"],
-        "forward_map": {
-          "111111111111111111": "777777777777777777"
-        }
+        "destinations": ["777777777777777777"]        
       }
     }
   }
@@ -68,14 +63,14 @@ Below is an example configuration with inline explanations.
 
 ## 🧠 Terminology
 
-| Term            | Meaning                                                                                           |
-|-----------------|---------------------------------------------------------------------------------------------------|
-| **Guild**       | A Discord server. Each guild has its own configuration.                                           |
-| **Section**     | A subgroup inside a guild’s config. Used to isolate multiple organizations or teams sharing one server. |
-| **Source**      | Channel where messages are read.                                                                  |
-| **Destination** | Channel where messages are forwarded.                                                             |
-| **Keyword**     | A trigger word that activates forwarding.                                                         |
-| **Admin**       | User who was added to bot admin list and can use protected commands.                              |
+| Term            | Meaning                                                                                                                       |
+|-----------------|-------------------------------------------------------------------------------------------------------------------------------|
+| **Guild**       | A Discord server. Each guild has its own configuration.                                                                       |
+| **Section**     | A subgroup inside a guild’s config. Used to isolate multiple organizations or teams sharing one server.                       |
+| **Source**      | Channel where messages are read.                                                                                              |
+| **Destination** | Channel where messages are forwarded. <br/>Index based: message from source[n] message will be forwarded to destination[n] channel |
+| **Keyword**     | A trigger word that activates forwarding.                                                                                     |
+| **Admin**       | User who was added to bot admin list and can use protected commands.                                                          |
 
 ---
 
@@ -109,7 +104,7 @@ Below is an example configuration with inline explanations.
 
 1. **Add your Discord ID to the bot admin list**: Type some protected command, you will see your Discord ID:
    ```text
-   ?fw addsource organization_section_name1 #channel_name1
+   ?fw addkeyword organization_section_name1 keyword
    
    Forwarder Bot: User with ID 123456789012345678 is not in Forwarder Bot admin list. Ask admin to add you to the list.
    ```
@@ -119,15 +114,7 @@ Below is an example configuration with inline explanations.
 2. **Add a new section for your organization**
    (Handled automatically when first using commands within the guild.)
 
-3. **Add source channels (Bot Admin only)** — channels the bot should monitor:
-
-   ```text
-   ?fw addsource organization_section_name1 #channel_name1
-   ?fw addsource organization_section_name1 #channel_name2
-   ?fw addsource organization_section_name2 #channel_name1
-   ```
-
-4. **Add keywords for this section (Bot Admin only)** — words that trigger forwarding:
+3. **Add keywords for this section (Bot Admin only)** — words that trigger forwarding:
 
    ```text
    ?fw addkeyword organization_section_name1 urgent
@@ -137,15 +124,25 @@ Below is an example configuration with inline explanations.
    ?fw addkeyword organization_section_name2 police
    ```
 
-5. **Set forwarding destinations (Bot Admin only)** — where messages matching keywords will be forwarded:
+4. **Add forwarding destinations (Bot Admin only)** — where messages matching keywords will be forwarded:
 
    ```text
-   ?fw setforward organization_section_name1 #channel_name1 #forwarded_channel1
-   ?fw setforward organization_section_name1 #channel_name2 #forwarded_channel1
-   ?fw setforward organization_section_name2 #channel_name1 #forwarded_channel2
+   ?fw addforward organization_section_name1 #channel_name1 #forwarded_channel1
+   ?fw addforward organization_section_name1 #channel_name2 #forwarded_channel1
+   ?fw addforward organization_section_name2 #channel_name1 #forwarded_channel2
+   ```
+    It is possible to add multiple destination channels for each source channel:
+    ```text
+   ?fw addforward organization_section_name1 #channel_name1 #forwarded_channel1
+   ?fw addforward organization_section_name1 #channel_name1 #forwarded_channel2
+   ```
+    As well as multiple source channels for each destination channel:
+    ```text
+   ?fw addforward organization_section_name1 #channel_name1 #forwarded_channel1
+   ?fw addforward organization_section_name1 #channel_name2 #forwarded_channel1
    ```
 
-6. **Send a test message** in one of the monitored channels:
+5. **Send a test message** in one of the monitored channels:
 
    ```
    "Urgent: server maintenance starts in 10 minutes!"
@@ -156,14 +153,16 @@ Below is an example configuration with inline explanations.
    * Forward the message to the destination channel(s)
    * Skip messages without matching keywords
    
-7. **Get list of all sections (Bot Admin only)**:
+   
+6. **Get list of all sections (Bot Admin only)**:
 
    ```text
    ?fw listsections
    ```
    Shows all sections created in this guild.
 
-8. **Remove section (Bot Admin only)**:
+
+7. **Remove section (Bot Admin only)**:
 
    ```text
    ?fw remsection organization_section_name1

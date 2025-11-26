@@ -19,7 +19,6 @@ if not DISCORD_TOKEN:
 # Discord intents
 # -----------------------
 # Message content intent is required to read messages
-# Members intent is required for DM subscriptions
 
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
