@@ -250,8 +250,8 @@ async def on_message(message):
     if message.author is message.guild.me:
         return
 
-    #debug
-    print(f"Got message: {message.content}")
+    # Debug
+    # print(f"Got message: {message.content}")
 
     guild_conf = ensure_guild(message.guild.id)
     for section_name, section in guild_conf.get("sections", {}).items():
