@@ -11,21 +11,24 @@ from data_utils import DATA, ensure_guild, ensure_section, save_data
 bot = commands.Bot(command_prefix=PREFIX, intents=INTENTS, help_command=None)
 
 
-
+# -----------------------
+# Utility
+# -----------------------
 def is_admin():
     async def predicate(ctx):
         if ctx.author.id in ADMIN_IDS.values():
             return True
         else:
-            await ctx.send(f"User with ID `{ctx.author.id}` is not in Forwarder Bot admin list. Ask admin to add you to the list to use the command.")
+            await ctx.send(f"User with ID `{ctx.author.id}` is not in my admin list. Ask admin to add you to the list to use the command.")
             return False
     return commands.check(predicate)
+
 
 # -----------------------
 # Сommands
 # -----------------------
 @is_admin()
-@bot.command(name="addkeyword", aliases=["akw", "addkw"])
+@bot.command(name="addkeyword", aliases=["ak"])
 async def addkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
@@ -38,7 +41,7 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
     await ctx.send(f"Added keyword: `{kw}` to section `{section_name}`")
 
 @is_admin()
-@bot.command(name="remkeyword", aliases=["rkw", "remkw"])
+@bot.command(name="remkeyword", aliases=["rk"])
 async def remkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
@@ -50,7 +53,7 @@ async def remkeyword(ctx, section_name: str, *, keyword: str):
     save_data(DATA)
     await ctx.send(f"Removed keyword: `{kw}` from section `{section_name}`")
 
-@bot.command(name="listkeywords", aliases=["lkw", "lskw"])
+@bot.command(name="listkeywords", aliases=["lk"])
 async def listkeywords(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
@@ -61,54 +64,137 @@ async def listkeywords(ctx, section_name: str):
     await ctx.send("Keywords: " + ", ".join(f"`{k}`" for k in kws))
 
 @is_admin()
-@bot.command(name="addsource", aliases=["as", "addsrc"])
-async def addsource(ctx, section_name: str, channel: discord.TextChannel):
-    guild_conf = ensure_guild(ctx.guild.id)
-    section = ensure_section(guild_conf, section_name)
-    cid = str(channel.id)
-    if cid in section["sources"]:
-        await ctx.send(f"The channel {channel.mention} is already being monitored in section `{section_name}`.")
-        return
-    section["sources"].append(cid)
-    save_data(DATA)
-    await ctx.send(f"Added {channel.mention} to monitored channels in section `{section_name}`.")
+@bot.command(name="addforward", aliases=["af"])
+async def addforward(ctx, section_name: str, source: discord.TextChannel, destination: discord.TextChannel):
 
-@is_admin()
-@bot.command(name="remsource", aliases=["rs", "rmsrc"])
-async def remsource(ctx, section_name: str, channel: discord.TextChannel):
-    guild_conf = ensure_guild(ctx.guild.id)
-    section = ensure_section(guild_conf, section_name)
-    cid = str(channel.id)
-    if cid not in section["sources"]:
-        await ctx.send(f"The channel {channel.mention} is not monitored in section `{section_name}`.")
-        return
-    section["sources"].remove(cid)
-    if cid in section["forward_map"]:
-        section["forward_map"].pop(cid)
-    save_data(DATA)
-    await ctx.send(f"Removed {channel.mention} from monitored channels in section `{section_name}`.")
-
-@is_admin()
-@bot.command(name="setforward", aliases=["sf", "setfw"])
-async def setforward(ctx, section_name: str, source: discord.TextChannel, destination: discord.TextChannel=None):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
     sid = str(source.id)
-    if sid not in section["sources"]:
-        await ctx.send(f"Source {source.mention} is not added in section `{section_name}`. Use !addsource first.")
+    did = str(destination.id)
+
+    # Check if there is already source:destination pair with same value and index
+    if sid in section["sources"] and did in section["destinations"]:
+        for idx, x in enumerate(section["sources"]):
+            if x == sid:
+                if section["destinations"][idx] == did:
+                    await ctx.send(
+                        f"Error: Forwarding from {source.mention} to {destination.mention} already exists in section `{section_name}`.")
+                    return
+
+    #Check if channels are exists and there is enough permissions
+    #  Source
+    channel = ctx.guild.get_channel(source.id)
+    if channel is None:
+        await ctx.send(f"Error: Source channel with id {source.id} is not found.")
         return
-    if destination is None:
-        section["forward_map"].pop(sid, None)
-        save_data(DATA)
-        await ctx.send(f"Forwarding from {source.mention} disabled in section `{section_name}`.")
+    bot_permissions = channel.permissions_for(ctx.guild.me)
+    if not bot_permissions.read_messages:
+        await ctx.send(f"Error: I don't have permission to read messages in Source channel {channel.mention}.")
         return
-    section["forward_map"][sid] = str(destination.id)
+    #  Destination
+    channel = ctx.guild.get_channel(destination.id)
+    if channel is None:
+        await ctx.send(f"Error: Destination channel with id {destination.id} is not found.")
+        return
+    bot_permissions = channel.permissions_for(ctx.guild.me)
+    if not bot_permissions.send_messages:
+        await ctx.send(f"Error: I don't have permission to send messages in Destination channel {channel.mention}.")
+        return
+
+    # Everything is good, adding source:destination pair
+    section["sources"].append(sid)
+    section["destinations"].append(did)
+    if len(section["sources"]) != len(section["destinations"]):
+        await ctx.send("Error: Sources and destinations arrays have different lengths. Data was not saved.")
+        return
     save_data(DATA)
     await ctx.send(f"Messages from {source.mention} will be forwarded to {destination.mention} in section `{section_name}`.")
     return
 
+
+"""
+Removes a forwarding rule from the given section.
+
+If no destination is provided:
+    – Finds the source in the parallel sources/destinations lists.
+    – Removes the source and its corresponding destination.
+
+If a destination is provided:
+    – Removes the rule only if the source is forwarded to that specific destination.
+
+Both lists must stay aligned (same length) after removal.
+"""
 @is_admin()
-@bot.command(name="listsections", aliases=["lsec"])
+@bot.command(name="remforward", aliases=["rf"])
+async def remforward(ctx, section_name: str, source: discord.TextChannel, destination: discord.TextChannel=None):
+    guild_conf = ensure_guild(ctx.guild.id)
+    section = ensure_section(guild_conf, section_name)
+    sid = str(source.id)
+
+    if sid not in section["sources"]:
+        await ctx.send(f"Error: Source {source.mention} is not added in section `{section_name}`.")
+        return
+
+    is_data_changed = False
+    if destination is None:
+        i = 0
+        while i < len(section["sources"]):
+            if section["sources"][i] == sid:
+                dest_removed = section["destinations"].pop(i)
+                dest_removed_channel = ctx.guild.get_channel(int(dest_removed))
+                section["sources"].pop(i)
+                is_data_changed = True
+                await ctx.send(f"Forwarding from {source.mention} to {dest_removed_channel.mention} disabled in section `{section_name}`.")
+            else:
+                i += 1
+        if is_data_changed:
+            if len(section["sources"]) != len(section["destinations"]):
+                await ctx.send("Error: Sources and destinations arrays have different lengths. Data was not saved.")
+                return
+            save_data(DATA)
+
+    else:
+        did = str(destination.id)
+        i = 0
+        while i < len(section["sources"]):
+            if section["sources"][i] == sid:
+                if section["destinations"][i] == did:
+                    dest_removed = section["destinations"].pop(i)
+                    dest_removed_channel = ctx.guild.get_channel(int(dest_removed))
+                    section["sources"].pop(i)
+                    is_data_changed = True
+                    await ctx.send(f"Forwarding from {source.mention} to {dest_removed_channel.mention} disabled in section `{section_name}`.")
+                else:
+                    i += 1
+            else:
+                i += 1
+        if is_data_changed:
+            if len(section["sources"]) != len(section["destinations"]):
+                await ctx.send("Error: Sources and destinations arrays have different lengths. Data was not saved.")
+                return
+            save_data(DATA)
+        else:
+            await ctx.send(f"Forwarding from {source.mention} to {destination.mention} not found in section `{section_name}`.")
+
+@bot.command(name="listforward", aliases=["lf"])
+async def listforward(ctx, section_name: str):
+    guild_conf = ensure_guild(ctx.guild.id)
+    section = ensure_section(guild_conf, section_name)
+
+    if not section["sources"] or not section["destinations"]:
+        await ctx.send("Forward list is empty.")
+        return
+
+    forward_list_message = "Forward list:"
+    for idx, x in enumerate(section["sources"]):
+        source_channel = ctx.guild.get_channel(int(x))
+        dest_id = section["destinations"][idx]
+        destination_channel = ctx.guild.get_channel(int(dest_id))
+        forward_list_message += f"\nMessages from {source_channel.mention} are forwarding to {destination_channel.mention}"
+    await ctx.send(forward_list_message)
+
+@is_admin()
+@bot.command(name="listsections", aliases=["ls"])
 async def listsections(ctx):
     guild_conf = ensure_guild(ctx.guild.id)
     sections = guild_conf["sections"]
@@ -118,7 +204,7 @@ async def listsections(ctx):
     await ctx.send("Sections list: `" + "`, `".join(sections.keys()) + "`")
 
 @is_admin()
-@bot.command(name="remsection", aliases=["rsec", "remsec"])
+@bot.command(name="remsection")
 async def remsection(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
     sections = guild_conf["sections"]
@@ -143,6 +229,12 @@ async def on_message(message):
     if not message.guild:
         return
 
+    if message.author is message.guild.me:
+        return
+
+    #debug
+    print(f"Got message: {message.content}")
+
     guild_conf = ensure_guild(message.guild.id)
     for section_name, section in guild_conf.get("sections", {}).items():
         sid = str(message.channel.id)
@@ -163,22 +255,29 @@ async def on_message(message):
         if not matched:
             continue
 
-        # Forward message
-        dest_id = section.get("forward_map", {}).get(sid)
-        if dest_id:
-            dest = message.guild.get_channel(int(dest_id))
-            if dest:
-                jump_url = message.jump_url
-                forwarded = (
-                    f"**Forwarded message from {message.channel.mention}**, Original: {jump_url}\n"
-                    f"Message: {message.content}"
-                )
-                try:
-                    await dest.send(forwarded)
-                    for att in message.attachments:
-                        await dest.send(att.url)
-                except Exception as e:
-                    print("Error forwarding:", e)
+        # Forwarding message for all source:destination pairs
+        for idx, x in enumerate(section["sources"]):
+            if x == sid:
+                dest_id = section["destinations"][idx]
+                if dest_id:
+                    dest = message.guild.get_channel(int(dest_id))
+                    if dest:
+                        bot_permissions = dest.permissions_for(message.guild.me)
+                        if not bot_permissions.send_messages:
+                            print(
+                                f"Error: I don't have permission to send messages in Destination channel {dest.mention}.")
+                            continue
+                        jump_url = message.jump_url
+                        forwarded = (
+                            f"**Forwarded message from {message.channel.mention}**, Original: {jump_url}\n"
+                            f"Message: {message.content}"
+                        )
+                        try:
+                            await dest.send(forwarded)
+                            for att in message.attachments:
+                                await dest.send(att.url)
+                        except Exception as e:
+                            print("Error forwarding:", e)
 
 # -----------------------
 # Command error handling
