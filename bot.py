@@ -293,7 +293,7 @@ async def on_message(message):
 
                         jump_url = message.jump_url
                         forwarded = (
-                            f"**Forwarded message from {message.channel.mention}**, Original: {jump_url}\n"
+                            f"**Forwarded message**, link: {jump_url}\n"
                             f"Message: {message.content}"
                         )
                         try:
