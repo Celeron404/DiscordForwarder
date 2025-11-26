@@ -1,6 +1,8 @@
 ﻿# bot.py
 import discord
 import traceback
+
+from discord import abc, Thread
 from discord.ext import commands
 
 from admins_ids import ADMIN_IDS
@@ -65,7 +67,7 @@ async def listkeywords(ctx, section_name: str):
 
 @is_admin()
 @bot.command(name="addforward", aliases=["af"])
-async def addforward(ctx, section_name: str, source: discord.TextChannel, destination: discord.TextChannel):
+async def addforward(ctx, section_name: str, source: abc.GuildChannel | discord.Thread, destination: abc.GuildChannel | discord.Thread):
 
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
@@ -81,25 +83,35 @@ async def addforward(ctx, section_name: str, source: discord.TextChannel, destin
                         f"Error: Forwarding from {source.mention} to {destination.mention} already exists in section `{section_name}`.")
                     return
 
-    #Check if channels are exists and there is enough permissions
-    #  Source
-    channel = ctx.guild.get_channel(source.id)
+    #Check if source channel/thread exists, check for permissions
+    channel = ctx.guild.get_channel_or_thread(source.id)
     if channel is None:
-        await ctx.send(f"Error: Source channel with id {source.id} is not found.")
+        await ctx.send(f"Error: Source channel/thread with id {source.id} is not found.")
         return
     bot_permissions = channel.permissions_for(ctx.guild.me)
-    if not bot_permissions.read_messages:
-        await ctx.send(f"Error: I don't have permission to read messages in Source channel {channel.mention}.")
-        return
-    #  Destination
-    channel = ctx.guild.get_channel(destination.id)
+    if isinstance(channel, Thread):
+        if not (bot_permissions.read_message_history or bot_permissions.view_channel):
+            await ctx.send(f"Error: I don't have permission to read messages in Source thread {channel.mention}.")
+            return
+    else:
+        if not bot_permissions.read_messages:
+            await ctx.send(f"Error: I don't have permission to read messages in Source channel {channel.mention}.")
+            return
+
+    #Check if destination channel/thread exists, check for permissions
+    channel = ctx.guild.get_channel_or_thread(destination.id)
     if channel is None:
-        await ctx.send(f"Error: Destination channel with id {destination.id} is not found.")
+        await ctx.send(f"Error: Destination channel/thread with id {destination.id} is not found.")
         return
     bot_permissions = channel.permissions_for(ctx.guild.me)
-    if not bot_permissions.send_messages:
-        await ctx.send(f"Error: I don't have permission to send messages in Destination channel {channel.mention}.")
-        return
+    if isinstance(channel, Thread):
+        if not bot_permissions.send_messages_in_threads:
+            await ctx.send(f"Error: I can't send messages to Destination thread {channel.mention}.")
+            return
+    else:
+        if not bot_permissions.send_messages:
+            await ctx.send(f"Error: I don't have permission to send messages in Destination channel {channel.mention}.")
+            return
 
     # Everything is good, adding source:destination pair
     section["sources"].append(sid)
@@ -126,7 +138,7 @@ Both lists must stay aligned (same length) after removal.
 """
 @is_admin()
 @bot.command(name="remforward", aliases=["rf"])
-async def remforward(ctx, section_name: str, source: discord.TextChannel, destination: discord.TextChannel=None):
+async def remforward(ctx, section_name: str, source: abc.GuildChannel | discord.Thread, destination: abc.GuildChannel=None | discord.Thread):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
     sid = str(source.id)
@@ -141,7 +153,7 @@ async def remforward(ctx, section_name: str, source: discord.TextChannel, destin
         while i < len(section["sources"]):
             if section["sources"][i] == sid:
                 dest_removed = section["destinations"].pop(i)
-                dest_removed_channel = ctx.guild.get_channel(int(dest_removed))
+                dest_removed_channel = ctx.guild.get_channel_or_thread(int(dest_removed))
                 section["sources"].pop(i)
                 is_data_changed = True
                 await ctx.send(f"Forwarding from {source.mention} to {dest_removed_channel.mention} disabled in section `{section_name}`.")
@@ -160,7 +172,7 @@ async def remforward(ctx, section_name: str, source: discord.TextChannel, destin
             if section["sources"][i] == sid:
                 if section["destinations"][i] == did:
                     dest_removed = section["destinations"].pop(i)
-                    dest_removed_channel = ctx.guild.get_channel(int(dest_removed))
+                    dest_removed_channel = ctx.guild.get_channel_or_thread(int(dest_removed))
                     section["sources"].pop(i)
                     is_data_changed = True
                     await ctx.send(f"Forwarding from {source.mention} to {dest_removed_channel.mention} disabled in section `{section_name}`.")
@@ -187,9 +199,9 @@ async def listforward(ctx, section_name: str):
 
     forward_list_message = "Forward list:"
     for idx, x in enumerate(section["sources"]):
-        source_channel = ctx.guild.get_channel(int(x))
+        source_channel = ctx.guild.get_channel_or_thread(int(x))
         dest_id = section["destinations"][idx]
-        destination_channel = ctx.guild.get_channel(int(dest_id))
+        destination_channel = ctx.guild.get_channel_or_thread(int(dest_id))
         forward_list_message += f"\nMessages from {source_channel.mention} are forwarding to {destination_channel.mention}"
     await ctx.send(forward_list_message)
 
@@ -260,13 +272,19 @@ async def on_message(message):
             if x == sid:
                 dest_id = section["destinations"][idx]
                 if dest_id:
-                    dest = message.guild.get_channel(int(dest_id))
+                    dest = message.guild.get_channel_or_thread(int(dest_id))
                     if dest:
                         bot_permissions = dest.permissions_for(message.guild.me)
-                        if not bot_permissions.send_messages:
-                            print(
-                                f"Error: I don't have permission to send messages in Destination channel {dest.mention}.")
-                            continue
+
+                        if isinstance(dest, Thread):
+                            if not bot_permissions.send_messages_in_threads:
+                                print(f"Error: I cannot send messages in Destination thread {dest.mention}.")
+                                continue
+                        else:
+                            if not bot_permissions.send_messages:
+                                print(f"Error: I don't have permission to send messages in Destination channel {dest.mention}.")
+                                continue
+
                         jump_url = message.jump_url
                         forwarded = (
                             f"**Forwarded message from {message.channel.mention}**, Original: {jump_url}\n"
@@ -274,10 +292,14 @@ async def on_message(message):
                         )
                         try:
                             await dest.send(forwarded)
+                            # Send attachments if any
                             for att in message.attachments:
                                 await dest.send(att.url)
                         except Exception as e:
                             print("Error forwarding:", e)
+                    else:
+                        print(f"Error: Destination with id {dest_id} is not found.")
+                        continue
 
 # -----------------------
 # Command error handling
