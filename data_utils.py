@@ -11,7 +11,7 @@ def save_data(json_data):
     with open(DATA_FILE, "w", encoding="utf-8-sig") as file:
         json.dump(json_data, file, ensure_ascii=False, indent=2)
 
-DATA = load_data()  # structure: data[guild_id]["sections"][section_name] = {keywords, sources, forward_map, mode, subscribers}
+DATA = load_data()  # structure: data[guild_id]["sections"][section_name] = {keywords, sources, destinations}
 
 def ensure_guild(gid):
     gid = str(gid)
@@ -27,9 +27,7 @@ def ensure_section(guild_conf, section_name):
         guild_conf["sections"][section_name] = {
             "keywords": [],
             "sources": [],
-            "forward_map": {},
-            "mode": "forward",
-            "subscribers": []
+            "destinations": []
         }
         save_data(DATA)
     return guild_conf["sections"][section_name]

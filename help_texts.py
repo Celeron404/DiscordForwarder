@@ -31,22 +31,6 @@ Set forwarding destination channel for a source channel for specific section. **
 If destination not provided → disable forwarding
 Aliases: `sf`, `setfw`
     
-`?fw setmode <section_name> <forward|dm|all>`
-Set the forwarding mode for specific section. **(Bot Admin Only)**
-Aliases: `sm`, `setmd`
-    
-`?fw subscribe <section_name>`
-Subscribe to DM alerts for keywords for specific section.
-Aliases: `sub`
-    
-`?fw unsubscribe <section_name>`
-Unsubscribe from DM alerts from specific section.
-Aliases: `unsub`
-    
-`?fw listsubs <section_name>`
-List all DM subscribers for specific section. **(Bot Admin Only)**
-Aliases: `lsub`
-    
 `?fw listsections`
 List all sections. **(Bot Admin Only)**
 Aliases: `lsec`
@@ -112,37 +96,6 @@ COMMAND_HELP = {
                   "If destination is not provided → disable forwarding\n"
                   "Example: `?fw setforward org1 #general`",
         "aliases": ["sf", "setfw"]
-    },
-
-    "setmode": {
-        "help":
-            "`?fw setmode <section_name> <forward|dm|all>` — Set the forwarding mode for specific section. **(Bot Admin Only)**\n"
-                  "`forward` - (Default) forward messages to configured channel for section.\n"
-                  "`dm` - send DM alerts to subscribers for section.\n"
-                  "`all` - forward messages to configured channel and send DM alerts to subscribers for section.\n"
-                  "Example: `?fw setmode org1 all`",
-        "aliases": ["sm", "setmd"]
-    },
-
-    "subscribe": {
-        "help":
-            "`?fw subscribe <section_name>` — Subscribe user called the command to DM alerts for specific section.\n"
-                  "Example: `?fw subscribe org1`",
-        "aliases": ["sub"]
-    },
-
-    "unsubscribe": {
-        "help":
-            "`?fw unsubscribe <section_name>` — Unsubscribe user called the command from DM alerts from specific section.\n"
-                  "Example: `?fw unsubscribe org1`",
-        "aliases": ["unsub"]
-    },
-
-    "listsubs": {
-        "help":
-            "`?fw listsubs <section_name>` — List all DM subscribers for specific section. **(Bot Admin Only)**\n" 
-                  "Example: `?fw listsubs org1 help`",
-        "aliases": ["lsub"]
     },
 
     "listsections": {

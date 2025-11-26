@@ -105,61 +105,7 @@ async def setforward(ctx, section_name: str, source: discord.TextChannel, destin
     section["forward_map"][sid] = str(destination.id)
     save_data(DATA)
     await ctx.send(f"Messages from {source.mention} will be forwarded to {destination.mention} in section `{section_name}`.")
-
-@is_admin()
-@bot.command(name="setmode", aliases=["sm", "setmd"])
-async def setmode(ctx, section_name: str, mode: str):
-    mode = mode.lower()
-    if mode not in ("forward", "dm", "all"):
-        await ctx.send("Invalid mode. Use: forward, dm, or all.")
-        return
-    guild_conf = ensure_guild(ctx.guild.id)
-    section = ensure_section(guild_conf, section_name)
-    section["mode"] = mode
-    save_data(DATA)
-    await ctx.send(f"Mode for section `{section_name}` set to: `{mode}`")
-
-# -----------------------
-# User DM subscriptions
-# -----------------------
-@bot.command(name="subscribe", aliases=["sub"])
-async def subscribe(ctx, section_name: str):
-    guild_conf = ensure_guild(ctx.guild.id)
-    section = ensure_section(guild_conf, section_name)
-    uid = str(ctx.author.id)
-    if uid in section["subscribers"]:
-        await ctx.send(f"You are already subscribed to DM alerts in section `{section_name}`.")
-        return
-    section["subscribers"].append(uid)
-    save_data(DATA)
-    await ctx.send(f"You are now subscribed to DM alerts for keyword matches in section `{section_name}`.")
-
-@bot.command(name="unsubscribe", aliases=["unsub"])
-async def unsubscribe(ctx, section_name: str):
-    guild_conf = ensure_guild(ctx.guild.id)
-    section = ensure_section(guild_conf, section_name)
-    uid = str(ctx.author.id)
-    if uid not in section["subscribers"]:
-        await ctx.send(f"You are not subscribed in section `{section_name}`.")
-        return
-    section["subscribers"].remove(uid)
-    save_data(DATA)
-    await ctx.send(f"You have been unsubscribed from DM alerts in section `{section_name}`.")
-
-@is_admin()
-@bot.command(name="listsubs", aliases=["lsub"])
-async def listsubs(ctx, section_name: str):
-    guild_conf = ensure_guild(ctx.guild.id)
-    section = ensure_section(guild_conf, section_name)
-    subs = section["subscribers"]
-    if not subs:
-        await ctx.send(f"Subscriber list in section `{section_name}` is empty.")
-        return
-    users = []
-    for uid in subs:
-        member = ctx.guild.get_member(int(uid))
-        users.append(member.display_name if member else uid)
-    await ctx.send("Subscribers: " + ", ".join(users))
+    return
 
 @is_admin()
 @bot.command(name="listsections", aliases=["lsec"])
@@ -217,40 +163,22 @@ async def on_message(message):
         if not matched:
             continue
 
-        mode = section.get("mode", "forward")
-
         # Forward message
-        if mode in ("forward", "all"):
-            dest_id = section.get("forward_map", {}).get(sid)
-            if dest_id:
-                dest = message.guild.get_channel(int(dest_id))
-                if dest:
-                    jump_url = message.jump_url
-                    forwarded = (
-                        f"**Forwarded message from {message.channel.mention}**, Original: {jump_url}\n"
-                        f"Message: {message.content}"
-                    )
-                    try:
-                        await dest.send(forwarded)
-                        for att in message.attachments:
-                            await dest.send(att.url)
-                    except Exception as e:
-                        print("Error forwarding:", e)
-
-        # DM subscribers
-        if mode in ("dm", "all"):
-            subs = list(section.get("subscribers", []))
-            if subs:
-                for uid in subs:
-                    try:
-                        user = await bot.fetch_user(int(uid))
-                        await user.send(
-                            f"Keyword matched in **{message.guild.name}** / {message.channel.mention}\n"
-                            f"Message: {message.content}\n"
-                            f"Link: {message.jump_url}"
-                        )
-                    except Exception as e:
-                        print(f"Failed to send DM to {uid}: {e}")
+        dest_id = section.get("forward_map", {}).get(sid)
+        if dest_id:
+            dest = message.guild.get_channel(int(dest_id))
+            if dest:
+                jump_url = message.jump_url
+                forwarded = (
+                    f"**Forwarded message from {message.channel.mention}**, Original: {jump_url}\n"
+                    f"Message: {message.content}"
+                )
+                try:
+                    await dest.send(forwarded)
+                    for att in message.attachments:
+                        await dest.send(att.url)
+                except Exception as e:
+                    print("Error forwarding:", e)
 
 # -----------------------
 # Command error handling
@@ -258,9 +186,9 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("Incorrect command usage. Please check the arguments.")
+        await ctx.send("Error: Incorrect command usage. Please check the arguments.")
     elif isinstance(error, commands.MissingPermissions):
-        await ctx.send("You do not have permission to run this command.")
+        await ctx.send("Error: You do not have permission to run this command.")
     elif isinstance(error, commands.CheckFailure):
         return
     else:
