@@ -63,7 +63,7 @@ async def listkeywords(ctx, section_name: str):
     if not kws:
         await ctx.send(f"The keyword list in section `{section_name}` is empty.")
         return
-    await ctx.send("Keywords: " + ", ".join(f"`{k}`" for k in kws))
+    await ctx.send(f"Keywords in section `{section_name}`: " + ", ".join(f"`{k}`" for k in kws))
 
 @is_admin()
 @bot.command(name="addforward", aliases=["af"])
@@ -203,7 +203,7 @@ async def listforward(ctx, section_name: str):
         await ctx.send("Forward list is empty.")
         return
 
-    forward_list_message = "Forward list:"
+    forward_list_message = f"Forward list for section `{section_name}`:"
     for idx, x in enumerate(section["sources"]):
         source_channel = ctx.guild.get_channel_or_thread(int(x))
         dest_id = section["destinations"][idx]
