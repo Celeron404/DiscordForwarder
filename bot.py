@@ -34,13 +34,29 @@ def is_admin():
 async def addkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
-    kw = keyword.strip().lower()
-    if kw in section["keywords"]:
-        await ctx.send(f"The keyword `{kw}` is already in the list of section `{section_name}`.")
-        return
-    section["keywords"].append(kw)
-    save_data(DATA)
-    await ctx.send(f"Added keyword: `{kw}` to section `{section_name}`")
+    keywords = keyword.strip().lower().split()
+
+    added_keywords = []
+    for k in keywords:
+        if k in section["keywords"]:
+            await ctx.send(f"The keyword `{k}` is already in the list of section `{section_name}`.")
+            continue
+        else:
+            section["keywords"].append(k)
+            added_keywords.append(k)
+    if added_keywords:
+        save_data(DATA)
+        added_keywords_str = ", ".join(f"`{x}`" for x in added_keywords)
+        await ctx.send(f"Added keyword(s) to section `{section_name}`: {added_keywords_str}")
+
+
+
+    # if kw in section["keywords"]:
+    #     await ctx.send(f"The keyword `{kw}` is already in the list of section `{section_name}`.")
+    #     return
+    # section["keywords"].append(kw)
+    # save_data(DATA)
+    # await ctx.send(f"Added keyword: `{kw}` to section `{section_name}`")
 
 @is_admin()
 @bot.command(name="remkeyword", aliases=["rk"])
