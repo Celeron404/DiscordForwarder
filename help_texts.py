@@ -8,10 +8,12 @@ GENERAL_HELP = """
 **Discord Forward Bot Commands**
 `?fw addkeyword <section_name> <keyword>`
 Add a new keyword to trigger forwarding for specific section. **(Bot Admin Only)**
+Multiple keywords are allowed to be added at once. Space character is used as a separator.
 Aliases: `ak`
     
 `?fw remkeyword <section_name> <keyword>`
 Remove a keyword from specific section. **(Bot Admin Only)**
+Multiple keywords are allowed to be removed at once. Space character is used as a separator.
 Aliases: `rk`
     
 `?fw listkeywords <section_name>`
@@ -50,7 +52,10 @@ COMMAND_HELP = {
             "`?fw addkeyword <section_name> <keyword>` — Add a new keyword for specific section. **(Bot Admin Only)**\n"
                       "Example: `?fw addkeyword org1 urgent`\n"
                       "Now all messages containing the keyword `urgent` will be forwarded for section `org1`\n"
-                      "(in case if addsource and addforward already configured).",
+                      "(in case if addforward already configured).\n"
+                      "Multiple keywords are allowed to be added at once. Space character is used as a separator.\n"
+                      "Example: `?fw addkeyword org1 urgent base tow`\n"
+                      "Now all messages containing the keywords `urgent`, `base` and `tow` will be forwarded for section `org1`",
         "aliases": ["ak"]
     },
 
@@ -58,7 +63,10 @@ COMMAND_HELP = {
         "help":
             "`?fw remkeyword <section_name> <keyword>` — Remove an existing keyword from specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw remkeyword org1 help`\n"
-                  "Now all messages containing the keyword `help` will no longer be forwarded for section `org1`",
+                  "Now all messages containing the keyword `help` will no longer be forwarded for section `org1`\n"
+                  "Multiple keywords are allowed to be removed at once. Space character is used as a separator.\n"
+                  "Example: `?fw remkeyword org1 help base tow`\n"
+                  "Now all messages containing the keywords `help`, `base` and `tow` will no longer be forwarded for section `org1`",
         "aliases": ["rk"]
     },
 
@@ -74,7 +82,7 @@ COMMAND_HELP = {
             "`?fw addforward <section_name> #<channel_source> #<channel_destination>` — Set a forwarding destination for specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw addforward org1 #general #forwarded`\n"
                   "Now all messages from channel `#general` will be forwarded to channel `#forwarded` for section `org1`.\n"
-                  "(in case if addkeyword and addsource already configured)\n"
+                  "(in case if addkeyword already configured)\n"
                   "If destination is not provided → disable forwarding\n"
                   "Example: `?fw addforward org1 #general`",
         "aliases": ["af"]

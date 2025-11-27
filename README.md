@@ -123,6 +123,11 @@ Below is an example configuration with inline explanations.
    ?fw addkeyword organization_section_name2 urgent
    ?fw addkeyword organization_section_name2 police
    ```
+   
+    Also it is possible to add multiple keywords **separated by space character**:
+    ```text
+   ?fw addkeyword organization_section_name1 urgent base tow
+   ```
 
 4. **Add forwarding destinations (Bot Admin only)** — where messages matching keywords will be forwarded:
 
