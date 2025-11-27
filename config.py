@@ -22,4 +22,3 @@ if not DISCORD_TOKEN:
 
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
-INTENTS.members = True
