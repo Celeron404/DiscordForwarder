@@ -9,6 +9,7 @@ GENERAL_HELP = """
 `?fw addkeyword <section_name> <keyword>`
 Add a new keyword to trigger forwarding for specific section. **(Bot Admin Only)**
 Multiple keywords are allowed to be added at once. Space character is used as a separator.
+Optional argument `--exact` **at the end of the command** will make the keyword to be matched exactly.
 Aliases: `ak`
     
 `?fw remkeyword <section_name> <keyword>`
@@ -55,7 +56,10 @@ COMMAND_HELP = {
                       "(in case if addforward already configured).\n"
                       "Multiple keywords are allowed to be added at once. Space character is used as a separator.\n"
                       "Example: `?fw addkeyword org1 urgent base tow`\n"
-                      "Now all messages containing the keywords `urgent`, `base` and `tow` will be forwarded for section `org1`",
+                      "Now all messages containing the keywords `urgent`, `base` and `tow` will be forwarded for section `org1`\n"
+                      "Optional argument `--exact` **at the end of the command** will make the keyword to be matched exactly.\n"
+                      "Example: `?fw addkeyword org1 tow --exact`\n"
+                      "Now all messages containing the keyword `tow` will be forwarded for section `org1` exactly. Words contains `towel` will not be forwarded",
         "aliases": ["ak"]
     },
 

@@ -8,6 +8,9 @@ Supports **multiple independent configurations per server**, making it ideal for
 ## 🚀 Features
 
 * **Keyword-based message forwarding** — automatically detect messages containing target words.
+* **Different modes of keyword matching**
+    * **Keyword matching** — automatically detect messages containing target words in any form.
+    * **Exact keyword matching** — automatically detect messages containing target words written exactly as in the list.
 * **Per-guild and per-section configuration** — each server can define multiple independent "sections" with their own filters and destinations.
 * **Multi-channel support** — monitor multiple source channels simultaneously as well as multiple destination channels.
 * **Persistent configuration** — settings stored in `data.json`.
@@ -39,7 +42,10 @@ Below is an example configuration with inline explanations.
         "_comment": "Section name for organization #1",
 
         "keywords": ["urgent", "alert", "meeting"],
-        "_comment_keywords": "List of words that trigger forwarding",
+        "_comment_keywords": "List of words that trigger forwarding if they are written in any form",
+        
+        "exact_keywords": ["tow", "help"],
+        "_comment_exact_keywords": "List of words that trigger forwarding only if they are written exactly as in the list",
 
         "sources": ["111111111111111111", "222222222222222222"],
         "_comment_sources": "IDs of channels to monitor",
@@ -51,6 +57,7 @@ Below is an example configuration with inline explanations.
       "org2": {
         "_comment": "Another section for organization #2",
         "keywords": ["urgent", "event"],
+        "exact_keywords": ["tow"],
         "sources": ["111111111111111111"],
         "destinations": ["777777777777777777"]        
       }
@@ -128,6 +135,15 @@ Below is an example configuration with inline explanations.
     ```text
    ?fw addkeyword organization_section_name1 urgent base tow
    ```
+   Bot will forward messages containing any of these keywords in any form: `urgent`, `urgently`, `tow`, `towel`.
+   <br><br>
+
+   It is also possible to add exact keywords with optional argument `--exact` **at the end of the command:**
+    ```text
+   ?fw addkeyword organization_section_name1 help --exact
+   ```
+   Bot will forward messages containing exact word `help`. Message contains `helping` will not be forwarded.
+
 
 4. **Add forwarding destinations (Bot Admin only)** — where messages matching keywords will be forwarded:
 
@@ -173,7 +189,7 @@ Below is an example configuration with inline explanations.
    ?fw remsection organization_section_name1
    ```
    Removes section `organization_section_name1`.<br>
-   *Reminder: If you want to add a section, no need to use specific commands. A new section will be created automatically when first using commands working with section, for example `?fw addkeyword`, `?fw addsource`.*
+   *Reminder: If you want to add a section, no need to use specific commands. A new section will be created automatically when first using commands working with section, for example `?fw addkeyword`*
 
 ---
 

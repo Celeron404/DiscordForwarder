@@ -1,6 +1,7 @@
 ﻿# bot.py
 import discord
 import traceback
+import re
 
 from discord import abc, Thread, ForumChannel
 from discord.ext import commands
@@ -34,29 +35,42 @@ def is_admin():
 async def addkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
-    keywords = keyword.strip().lower().split()
 
+    # Check if flag "--exact" was received at the end of the command
+    exact = False
+    if keyword.endswith("--exact"):
+        exact = True
+        keyword = keyword.replace("--exact", "")
+    elif "--" in keyword:
+        await ctx.send("Error: Incorrect command usage. Please check optional arguments.  `--exact` should be only at the end of the command.\n"
+                       "Correct example with argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN> --exact`\n"
+                       "Correct example without argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN> `")
+        return
+
+    # Check if keywords are already in the lists and add them if not
+    keywords = keyword.strip().lower().split()
     added_keywords = []
     for k in keywords:
         if k in section["keywords"]:
             await ctx.send(f"The keyword `{k}` is already in the list of section `{section_name}`.")
             continue
+        elif k in section["exact_keywords"]:
+            await ctx.send(f"The keyword `{k}` is already in the exact keywords list of section `{section_name}`.")
+            continue
         else:
-            section["keywords"].append(k)
+            if exact:
+                section["exact_keywords"].append(k)
+            else:
+                section["keywords"].append(k)
             added_keywords.append(k)
+
     if added_keywords:
         save_data(DATA)
         added_keywords_str = ", ".join(f"`{x}`" for x in added_keywords)
-        await ctx.send(f"Added keyword(s) to section `{section_name}`: {added_keywords_str}")
-
-
-
-    # if kw in section["keywords"]:
-    #     await ctx.send(f"The keyword `{kw}` is already in the list of section `{section_name}`.")
-    #     return
-    # section["keywords"].append(kw)
-    # save_data(DATA)
-    # await ctx.send(f"Added keyword: `{kw}` to section `{section_name}`")
+        if exact:
+            await ctx.send(f"Added keyword(s) to exact keywords list of section `{section_name}`: {added_keywords_str}")
+        else:
+            await ctx.send(f"Added keyword(s) to section `{section_name}`: {added_keywords_str}")
 
 @is_admin()
 @bot.command(name="remkeyword", aliases=["rk"])
@@ -66,27 +80,49 @@ async def remkeyword(ctx, section_name: str, *, keyword: str):
     keywords = keyword.strip().lower().split()
 
     removed_keywords = []
+    exact_removed_keywords = []
     for k in keywords:
-        if k not in section["keywords"]:
-            await ctx.send(f"The keyword `{k}` is not in the list of section `{section_name}`.")
-            continue
-        else:
+        keyword_in_list = False
+        if k in section["keywords"]:
             section["keywords"].remove(k)
             removed_keywords.append(k)
-    if removed_keywords:
+            keyword_in_list = True
+        if k in section["exact_keywords"]:
+            section["exact_keywords"].remove(k)
+            exact_removed_keywords.append(k)
+            keyword_in_list = True
+        if not keyword_in_list:
+            await ctx.send(f"The keyword `{k}` is not in the list and not in the exact keywords list of section `{section_name}`.")
+
+    if removed_keywords or exact_removed_keywords:
         save_data(DATA)
-        removed_keywords_str = ", ".join(f"`{x}`" for x in removed_keywords)
-        await ctx.send(f"Removed keyword(s) from section `{section_name}`: {removed_keywords_str}")
+        msg_to_send = ""
+        if removed_keywords:
+            msg_to_send = f"Removed keyword(s) from section `{section_name}`: " + ", ".join(f"`{k}`" for k in removed_keywords)
+        if exact_removed_keywords:
+            if msg_to_send:
+                msg_to_send += "\n"
+            msg_to_send += f"Removed keyword(s) from exact keywords list of section `{section_name}`: " + ", ".join(f"`{k}`" for k in exact_removed_keywords)
+        await ctx.send(msg_to_send)
 
 @bot.command(name="listkeywords", aliases=["lk"])
 async def listkeywords(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
-    kws = section["keywords"]
-    if not kws:
-        await ctx.send(f"The keyword list in section `{section_name}` is empty.")
-        return
-    await ctx.send(f"Keywords in section `{section_name}`: " + ", ".join(f"`{k}`" for k in kws))
+    keywords = section["keywords"]
+    exact_keywords = section["exact_keywords"]
+
+    if keywords or exact_keywords:
+        msg_to_send = ""
+        if keywords:
+            msg_to_send = f"Keywords list in section `{section_name}`: " + ", ".join(f"`{k}`" for k in keywords)
+        if exact_keywords:
+            if msg_to_send:
+                msg_to_send += "\n"
+            msg_to_send += f"Exact keywords list in section `{section_name}`: " + ", ".join(f"`{k}`" for k in exact_keywords)
+        await ctx.send(msg_to_send)
+    else:
+        await ctx.send(f"The keyword and exact keyword lists in section `{section_name}` are empty.")
 
 @is_admin()
 @bot.command(name="addforward", aliases=["af"])
@@ -286,8 +322,17 @@ async def on_message(message):
         if not content:
             continue
 
-        # Check for keyword match
+        # Check for exact keyword match
         matched = False
+        for kw in section["exact_keywords"]:
+            if kw:
+                regex_pattern = r"\b{kw}\b".format(kw = kw)
+                regex = re.compile(regex_pattern)
+                if regex.search(content):
+                    matched = True
+                    break
+
+        # Check for not exact (not strict) keyword match
         for kw in section["keywords"]:
             if kw and kw in content:
                 matched = True
