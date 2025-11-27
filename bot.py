@@ -42,10 +42,12 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
         exact = True
         keyword = keyword.replace("--exact", "")
     elif "--" in keyword:
-        await ctx.send("Error: Incorrect command usage. Please check optional arguments.  `--exact` should be only at the end of the command.\n"
-                       "Correct example with argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN> --exact`\n"
-                       "Correct example without argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN> `")
-        return
+        raise commands.CommandError(
+            "Error: Incorrect command usage. Please check optional arguments.\n"
+            "`--exact` should be only at the end of the command.\n"
+            "Correct example with argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN> --exact`\n"
+            "Correct example without argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN>`"
+        )
 
     # Check if keywords are already in the lists and add them if not
     keywords = keyword.strip().lower().split()
@@ -138,55 +140,45 @@ async def addforward(ctx, section_name: str, source: abc.GuildChannel | discord.
         for idx, x in enumerate(section["sources"]):
             if x == sid:
                 if section["destinations"][idx] == did:
-                    await ctx.send(
-                        f"Error: Forwarding from {source.mention} to {destination.mention} already exists in section `{section_name}`.")
-                    return
+                    raise commands.CommandError(
+                        f"Error: Forwarding from {source.mention} to {destination.mention} already exists in section `{section_name}`."
+                    )
 
     #Check if source channel/thread exists, check for permissions
     channel = ctx.guild.get_channel_or_thread(source.id)
     if channel is None:
-        await ctx.send(f"Error: Source channel/thread with id {source.id} is not found.")
-        return
+        raise commands.CommandError(f"Error: Source channel/thread with id {source.id} is not found.")
     bot_permissions = channel.permissions_for(ctx.guild.me)
     if isinstance(channel, Thread):
         if not (bot_permissions.read_message_history or bot_permissions.view_channel):
-            await ctx.send(f"Error: I don't have permission to read messages in Source thread {channel.mention}.")
-            return
+            raise commands.CommandError(f"Error: I don't have permission to read messages in Source thread {channel.mention}.")
     else:
         if not bot_permissions.read_messages:
-            await ctx.send(f"Error: I don't have permission to read messages in Source channel {channel.mention}.")
-            return
+            raise commands.CommandError(f"Error: I don't have permission to read messages in Source channel {channel.mention}.")
     if isinstance(channel, ForumChannel):
-        await ctx.send(f"Error: Source should be a channel or thread, not a forum channel.")
-        return
+        raise commands.CommandError(f"Error: Source should be a channel or thread, not a forum channel.")
 
     #Check if destination channel/thread exists, check for permissions
     channel = ctx.guild.get_channel_or_thread(destination.id)
     if channel is None:
-        await ctx.send(f"Error: Destination channel/thread with id {destination.id} is not found.")
-        return
+        raise commands.CommandError(f"Error: Destination channel/thread with id {destination.id} is not found.")
     bot_permissions = channel.permissions_for(ctx.guild.me)
     if isinstance(channel, Thread):
         if not bot_permissions.send_messages_in_threads:
-            await ctx.send(f"Error: I can't send messages to Destination thread {channel.mention}.")
-            return
+            raise commands.CommandError(f"Error: I can't send messages to Destination thread {channel.mention}.")
     else:
         if not bot_permissions.send_messages:
-            await ctx.send(f"Error: I don't have permission to send messages in Destination channel {channel.mention}.")
-            return
+            raise commands.CommandError(f"Error: I don't have permission to send messages in Destination channel {channel.mention}.")
     if isinstance(channel, ForumChannel):
-        await ctx.send(f"Error: Destination should be a channel or thread, not a forum channel.")
-        return
+        raise commands.CommandError(f"Error: Destination should be a channel or thread, not a forum channel.")
 
     # Everything is good, adding source:destination pair
     section["sources"].append(sid)
     section["destinations"].append(did)
     if len(section["sources"]) != len(section["destinations"]):
-        await ctx.send("Error: Sources and destinations arrays have different lengths. Data was not saved.")
-        return
+        raise commands.CommandError("Error: Sources and destinations arrays have different lengths. Data was not saved.")
     save_data(DATA)
     await ctx.send(f"Messages from {source.mention} will be forwarded to {destination.mention} in section `{section_name}`.")
-    return
 
 
 """
@@ -209,8 +201,7 @@ async def remforward(ctx, section_name: str, source: abc.GuildChannel | discord.
     sid = str(source.id)
 
     if sid not in section["sources"]:
-        await ctx.send(f"Error: Source {source.mention} is not added in section `{section_name}`.")
-        return
+        raise commands.CommandError(f"Error: Source {source.mention} is not added in section `{section_name}`.")
 
     is_data_changed = False
     if destination is None:
@@ -226,8 +217,7 @@ async def remforward(ctx, section_name: str, source: abc.GuildChannel | discord.
                 i += 1
         if is_data_changed:
             if len(section["sources"]) != len(section["destinations"]):
-                await ctx.send("Error: Sources and destinations arrays have different lengths. Data was not saved.")
-                return
+                raise commands.CommandError("Error: Sources and destinations arrays have different lengths. Data was not saved.")
             save_data(DATA)
 
     else:
@@ -247,8 +237,7 @@ async def remforward(ctx, section_name: str, source: abc.GuildChannel | discord.
                 i += 1
         if is_data_changed:
             if len(section["sources"]) != len(section["destinations"]):
-                await ctx.send("Error: Sources and destinations arrays have different lengths. Data was not saved.")
-                return
+                raise commands.CommandError("Error: Sources and destinations arrays have different lengths. Data was not saved.")
             save_data(DATA)
         else:
             await ctx.send(f"Forwarding from {source.mention} to {destination.mention} not found in section `{section_name}`.")
@@ -380,15 +369,26 @@ async def on_message(message):
 # -----------------------
 @bot.event
 async def on_command_error(ctx, error):
+    print(f"Command error: {error} \n{traceback.format_exception(error)}")
+    embed = discord.Embed(
+        title="Command error",
+        description=f"{error}",
+        color=discord.Color.red()
+    )
+
+    if isinstance(error, commands.CommandInvokeError):
+        error = error.original
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("Error: Incorrect command usage. Please check the arguments.")
+        embed.description = f"```'{error.param.name}'``` is a required argument."
+    elif isinstance(error, commands.CommandNotFound):
+        embed.description = "```Command not found.```"
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("Error: You do not have permission to run this command.")
     elif isinstance(error, commands.CheckFailure):
         return
-    else:
-        print(f"Command error: {error} \n{traceback.format_exception(error)}")
-        await ctx.send(f"Command error: {error}")
+
+    await ctx.send(embed=embed)
+
 
 # -----------------------
 # Help command
