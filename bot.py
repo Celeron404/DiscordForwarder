@@ -63,13 +63,20 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
 async def remkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
-    kw = keyword.strip().lower()
-    if kw not in section["keywords"]:
-        await ctx.send(f"The keyword `{kw}` is not in the list of section `{section_name}`.")
-        return
-    section["keywords"].remove(kw)
-    save_data(DATA)
-    await ctx.send(f"Removed keyword: `{kw}` from section `{section_name}`")
+    keywords = keyword.strip().lower().split()
+
+    removed_keywords = []
+    for k in keywords:
+        if k not in section["keywords"]:
+            await ctx.send(f"The keyword `{k}` is not in the list of section `{section_name}`.")
+            continue
+        else:
+            section["keywords"].remove(k)
+            removed_keywords.append(k)
+    if removed_keywords:
+        save_data(DATA)
+        removed_keywords_str = ", ".join(f"`{x}`" for x in removed_keywords)
+        await ctx.send(f"Removed keyword(s) from section `{section_name}`: {removed_keywords_str}")
 
 @bot.command(name="listkeywords", aliases=["lk"])
 async def listkeywords(ctx, section_name: str):
