@@ -292,17 +292,19 @@ async def remsection(ctx, section_name: str):
 async def if_matched(section, content):
     # Check for exact keyword match
     matched = ""
+    separator_mode_triggered = False
+    if SEPARATOR_MODE and content.count("\n") > 0:
+        content = content.split("\n")
+        separator_mode_triggered = True
     for kw in section["exact_keywords"]:
         if kw:
             regex_pattern = r"\b{kw}\b".format(kw=kw)
             regex = re.compile(regex_pattern)
 
-            if SEPARATOR_MODE and content.count("\n") > 0:
-                content = content.split("\n")
+            if separator_mode_triggered:
                 for line in content:
                     if regex.search(line):
-                        matched = line
-                        break
+                        matched += line + "\n"
             else:
                 if regex.search(content):
                     matched = content
@@ -310,12 +312,10 @@ async def if_matched(section, content):
 
     # Check for not exact (not strict) keyword match
     for kw in section["keywords"]:
-        if SEPARATOR_MODE and content.count("\n") > 0:
-            content = content.split("\n")
+        if separator_mode_triggered:
             for line in content:
                 if kw and kw in line:
-                    matched = line
-                    break
+                    matched += line + "\n"
         else:
             if kw and kw in content:
                 matched = content
