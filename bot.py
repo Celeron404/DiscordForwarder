@@ -334,7 +334,7 @@ async def on_message(message):
         return
 
     # Debug
-    print(f"Got message: {message.content}")
+    # print(f"Got message: {message.content}")
 
     guild_conf = ensure_guild(message.guild.id)
     for section_name, section in guild_conf.get("sections", {}).items():
