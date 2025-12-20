@@ -8,6 +8,7 @@ import discord
 # -----------------------
 PREFIX = "?fw "  # Command prefix used to trigger bot commands
 DATA_FILE = "data.json"  # Path to JSON file for storing keywords, sources, etc.
+SEPARATOR_MODE = True  # If True, messages containing multiple lines will be split into separate lines by the bot and each line will be processed separately.
 
 # Loading Discord token from .env
 env_helper.load_env()

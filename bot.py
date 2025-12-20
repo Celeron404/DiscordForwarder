@@ -7,7 +7,7 @@ from discord import abc, Thread, ForumChannel
 from discord.ext import commands
 
 from admins_ids import ADMIN_IDS
-from config import PREFIX, DISCORD_TOKEN, INTENTS
+from config import PREFIX, DISCORD_TOKEN, INTENTS, SEPARATOR_MODE
 from help_texts import GENERAL_HELP, COMMAND_HELP
 from data_utils import DATA, ensure_guild, ensure_section, save_data
 
@@ -288,6 +288,41 @@ async def remsection(ctx, section_name: str):
 # -----------------------
 # Message monitoring logic
 # -----------------------
+
+async def if_matched(section, content):
+    # Check for exact keyword match
+    matched = ""
+    for kw in section["exact_keywords"]:
+        if kw:
+            regex_pattern = r"\b{kw}\b".format(kw=kw)
+            regex = re.compile(regex_pattern)
+
+            if SEPARATOR_MODE and content.count("\n") > 0:
+                content = content.split("\n")
+                for line in content:
+                    if regex.search(line):
+                        matched = line
+                        break
+            else:
+                if regex.search(content):
+                    matched = content
+                    break
+
+    # Check for not exact (not strict) keyword match
+    for kw in section["keywords"]:
+        if SEPARATOR_MODE and content.count("\n") > 0:
+            content = content.split("\n")
+            for line in content:
+                if kw and kw in line:
+                    matched = line
+                    break
+        else:
+            if kw and kw in content:
+                matched = content
+                break
+
+    return matched
+
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
@@ -299,7 +334,7 @@ async def on_message(message):
         return
 
     # Debug
-    # print(f"Got message: {message.content}")
+    print(f"Got message: {message.content}")
 
     guild_conf = ensure_guild(message.guild.id)
     for section_name, section in guild_conf.get("sections", {}).items():
@@ -311,23 +346,8 @@ async def on_message(message):
         if not content:
             continue
 
-        # Check for exact keyword match
-        matched = False
-        for kw in section["exact_keywords"]:
-            if kw:
-                regex_pattern = r"\b{kw}\b".format(kw = kw)
-                regex = re.compile(regex_pattern)
-                if regex.search(content):
-                    matched = True
-                    break
-
-        # Check for not exact (not strict) keyword match
-        for kw in section["keywords"]:
-            if kw and kw in content:
-                matched = True
-                break
-
-        if not matched:
+        matched_str = await if_matched(section, content)
+        if not matched_str:
             continue
 
         # Forwarding message for all source:destination pairs
@@ -351,8 +371,9 @@ async def on_message(message):
                         jump_url = message.jump_url
                         forwarded = (
                             f"**Forwarded message**, link: {jump_url}\n"
-                            f"Message: {message.content}"
+                            f"Message: {matched_str}"
                         )
+
                         try:
                             await dest.send(forwarded)
                             # Send attachments if any
@@ -363,6 +384,7 @@ async def on_message(message):
                     else:
                         print(f"Error: Destination with id {dest_id} is not found.")
                         continue
+
 
 # -----------------------
 # Command error handling

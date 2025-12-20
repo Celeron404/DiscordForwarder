@@ -15,6 +15,7 @@ Supports **multiple independent configurations per server**, making it ideal for
 * **Multi-channel support** — monitor multiple source channels simultaneously as well as multiple destination channels.
 * **Persistent configuration** — settings stored in `data.json`.
 * **Admin commands** — only approved users can use protected commands.
+* **Separator mode** — if enabled, messages containing multiple lines will be split into separate lines by the bot and each line will be processed separately.
 
 ---
 
@@ -103,6 +104,10 @@ Below is an example configuration with inline explanations.
 
    ```bash
    python bot.py
+   ```
+5. (Optional) If needed, separator mode can be turned on. In this mode, messages containing multiple lines will be split into separate lines by the bot and each line will be processed separately. Set separator mode in `config.py` file:
+   ```python
+   SEPARATOR_MODE = True
    ```
 
 ---
