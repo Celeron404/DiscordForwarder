@@ -7,7 +7,7 @@ from discord import abc, Thread, ForumChannel
 from discord.ext import commands
 
 from admins_ids import ADMIN_IDS
-from config import PREFIX, DISCORD_TOKEN, INTENTS, SEPARATOR_MODE
+from config import PREFIX, DISCORD_TOKEN, INTENTS, SEPARATOR_MODE, INGAME_CHAT_NICK_REMOVER
 from help_texts import GENERAL_HELP, COMMAND_HELP
 from data_utils import DATA, ensure_guild, ensure_section, save_data
 
@@ -25,6 +25,15 @@ def is_admin():
             await ctx.send(f"User with ID `{ctx.author.id}` is not in my admin list. Ask admin to add you to the list to use the command.")
             return False
     return commands.check(predicate)
+
+def remove_chat_nickname(message: str):
+    separator = ": "
+    output_message = message.split(separator)
+    if len(output_message) < 2:
+        return message
+    #Debug
+    print(f"Part of message without nickname: {output_message[1]}")
+    return output_message[1]
 
 
 # -----------------------
@@ -303,9 +312,15 @@ async def if_matched(section, content):
 
             if separator_mode_triggered:
                 for line in content:
+                    if INGAME_CHAT_NICK_REMOVER:
+                        line = remove_chat_nickname(line)
+
                     if regex.search(line):
                         matched += line + "\n"
             else:
+                if INGAME_CHAT_NICK_REMOVER:
+                    content = remove_chat_nickname(content)
+
                 if regex.search(content):
                     matched = content
                     break
@@ -314,9 +329,15 @@ async def if_matched(section, content):
     for kw in section["keywords"]:
         if separator_mode_triggered:
             for line in content:
+                if INGAME_CHAT_NICK_REMOVER:
+                    line = remove_chat_nickname(line)
+
                 if kw and kw in line:
                     matched += line + "\n"
         else:
+            if INGAME_CHAT_NICK_REMOVER:
+                content = remove_chat_nickname(content)
+
             if kw and kw in content:
                 matched = content
                 break

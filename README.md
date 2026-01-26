@@ -109,6 +109,11 @@ Below is an example configuration with inline explanations.
    ```python
    SEPARATOR_MODE = True
    ```
+6. (Optional) If needed, for 41Shots server in-game chat nickname filter can be turned on. In this mode, messages containing nicknames will be filtered: message sender nickname will be removed from the message before watching for keywords.
+   Set `INGAME_CHAT_NICK_REMOVER` to `True` in `config.py` file:
+   ```python
+   INGAME_CHAT_NICK_REMOVER = True
+   ```
 
 ---
 
