@@ -31,8 +31,6 @@ def remove_chat_nickname(message: str):
     output_message = message.split(separator)
     if len(output_message) < 2:
         return message
-    #Debug
-    print(f"Part of message without nickname: {output_message[1]}")
     return output_message[1]
 
 
