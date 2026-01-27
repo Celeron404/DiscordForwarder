@@ -28,7 +28,7 @@ def is_admin():
 
 def remove_chat_nickname(message: str):
     separator = ": "
-    output_message = message.split(separator)
+    output_message = message.split(separator, 1)
     if len(output_message) < 2:
         return message
     return output_message[1]
