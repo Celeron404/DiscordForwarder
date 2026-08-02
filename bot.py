@@ -75,9 +75,9 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
 
     save_data(DATA)
     if exact:
-        await ctx.send(f"Added keyword to exact keywords list of section `{section_name}`: {keyword}")
+        await ctx.send(f"Added keyword to exact keywords list of section `{section_name}`: ``{keyword}``")
     else:
-        await ctx.send(f"Added keyword to section `{section_name}`: {keyword}")
+        await ctx.send(f"Added keyword to section `{section_name}`: ``{keyword}``")
 
 @is_admin()
 @bot.command(name="remkeyword", aliases=["rk"])
@@ -99,7 +99,7 @@ async def remkeyword(ctx, section_name: str, *, keyword: str):
             exact_removed_keywords.append(k)
             keyword_in_list = True
         if not keyword_in_list:
-            await ctx.send(f"The keyword `{k}` is not in the list and not in the exact keywords list of section `{section_name}`.")
+            await ctx.send(f"The keyword ``{k}`` is not in the list and not in the exact keywords list of section `{section_name}`.")
 
     if removed_keywords or exact_removed_keywords:
         save_data(DATA)
@@ -122,11 +122,11 @@ async def listkeywords(ctx, section_name: str):
     if keywords or exact_keywords:
         msg_to_send = ""
         if keywords:
-            msg_to_send = f"Keywords list in section `{section_name}`: " + ", ".join(f"`{k}`" for k in keywords)
+            msg_to_send = f"Keywords list in section `{section_name}`: " + ", ".join(f"``{k}``" for k in keywords)
         if exact_keywords:
             if msg_to_send:
                 msg_to_send += "\n"
-            msg_to_send += f"Exact keywords list in section `{section_name}`: " + ", ".join(f"`{k}`" for k in exact_keywords)
+            msg_to_send += f"Exact keywords list in section `{section_name}`: " + ", ".join(f"``{k}``" for k in exact_keywords)
         await ctx.send(msg_to_send)
     else:
         await ctx.send(f"The keyword and exact keyword lists in section `{section_name}` are empty.")
