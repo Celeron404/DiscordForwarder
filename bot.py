@@ -57,29 +57,24 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
         )
 
     # Check if keywords are already in the lists and add them if not
-    keywords = keyword.strip().lower().split()
-    added_keywords = []
-    for k in keywords:
-        if k in section["keywords"]:
-            await ctx.send(f"The keyword `{k}` is already in the list of section `{section_name}`.")
-            continue
-        elif k in section["exact_keywords"]:
-            await ctx.send(f"The keyword `{k}` is already in the exact keywords list of section `{section_name}`.")
-            continue
-        else:
-            if exact:
-                section["exact_keywords"].append(k)
-            else:
-                section["keywords"].append(k)
-            added_keywords.append(k)
-
-    if added_keywords:
-        save_data(DATA)
-        added_keywords_str = ", ".join(f"`{x}`" for x in added_keywords)
+    keyword = keyword.strip().lower()
+    if keyword in section["keywords"]:
+        await ctx.send(f"The keyword `{keyword}` is already in the list of section `{section_name}`.")
+        return
+    elif keyword in section["exact_keywords"]:
+        await ctx.send(f"The keyword `{keyword}` is already in the exact keywords list of section `{section_name}`.")
+        return
+    else:
         if exact:
-            await ctx.send(f"Added keyword(s) to exact keywords list of section `{section_name}`: {added_keywords_str}")
+            section["exact_keywords"].append(keyword)
         else:
-            await ctx.send(f"Added keyword(s) to section `{section_name}`: {added_keywords_str}")
+            section["keywords"].append(keyword)
+
+    save_data(DATA)
+    if exact:
+        await ctx.send(f"Added keyword to exact keywords list of section `{section_name}`: {keyword}")
+    else:
+        await ctx.send(f"Added keyword to section `{section_name}`: {keyword}")
 
 @is_admin()
 @bot.command(name="remkeyword", aliases=["rk"])
