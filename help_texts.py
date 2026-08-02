@@ -52,14 +52,20 @@ COMMAND_HELP = {
                       "Example: `?fw addkeyword org1 urgent`\n"
                       "Now all messages containing the keyword `urgent` will be forwarded for section `org1`\n"
                       "(in case if addforward already configured).\n"
-                      "Sentences are allowed to be added at once.\n"
+                      "Sentences are allowed to be added as well.\n"
                       "Example: `?fw addkeyword org1 help i am stuck`\n"
                       "Now all messages containing the sentence `help i am stuck` will be forwarded for section `org1`\n"
+                      "**Arguments**\n"
                       "Optional argument `--exact` **at the end of the command** will make the keyword or sentence to be matched exactly.\n"
                       "Example: `?fw addkeyword org1 tow --exact`\n"
-                      "Now all messages containing the keyword `tow` will be forwarded for section `org1` exactly. Words contains `towel` will not be forwarded.\n",
-                      "Same works with sentences, but for whole sentence, not each word insite separately.\n"
-                      "**Note:** Exact sentences will be forwarded if they are not contain any symbols at the start or end of the sentence. `hi, how are you` will be forwarded, but `hi, how are you?` will not be forwarded.\n"
+                      "Now all messages containing the keyword `tow` will be forwarded for section `org1` exactly. Words contains `towel` will not be forwarded.\n"
+                      "The same works with sentences, but for a whole sentence, not each word inside the sentence separately.\n"
+                      "**Note:** Exact sentences will be forwarded if they are not contain any symbols at the start or end of the sentence. `hi, how are you` will be forwarded, but `hi, how are you?` will not be forwarded.\n\n"
+                      "Optional argument `--exclude` **at the end of the command** will make the keyword or sentence to be ignored even in case when it is matched.\n"
+                      "Example: `?fw addkeyword org1 error --exclude`\n"
+                      "Now all messages containing the keyword `error` will be ignored and not be forwarded.\n"
+                      "The same works with sentences, but for a whole sentence, not each word inside the sentence separately.\n\n"
+                      "**Note:** Only one argument can be used at the same time.\n",
         "aliases": ["ak"]
     },
 
