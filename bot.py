@@ -263,6 +263,16 @@ async def listforward(ctx, section_name: str):
         source_channel = ctx.guild.get_channel_or_thread(int(x))
         dest_id = section["destinations"][idx]
         destination_channel = ctx.guild.get_channel_or_thread(int(dest_id))
+
+        if not source_channel and not destination_channel:
+            forward_list_message += f"\nSource channel `{x}` and destination channel `{dest_id}` are not found. Forward list not working anymore for this pair.\n\tPlease remove the pair or fix the channel IDs, for example make a forum post active again."
+            continue
+        if not source_channel:
+            forward_list_message += f"\nSource channel `{x}` is not found.\n\tForward list is not working anymore for pair: Source channel `{x}`, Destination channel `{dest_id}`.\n\tPlease remove the pair or fix the channel IDs, for example make a forum post active again."
+            continue
+        if not destination_channel:
+            forward_list_message += f"\nDestination channel `{dest_id}` is not found.\n\tForward list is not working anymore for pair: Source channel `{x}`, Destination channel `{dest_id}`.\n\tPlease remove the pair or fix the channel IDs, for example make a forum post active again."
+            continue
         forward_list_message += f"\nMessages from {source_channel.mention} are forwarding to {destination_channel.mention}"
     await ctx.send(forward_list_message)
 
