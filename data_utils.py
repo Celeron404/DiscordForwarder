@@ -27,6 +27,7 @@ def ensure_section(guild_conf, section_name):
         guild_conf["sections"][section_name] = {
             "keywords": [],
             "exact_keywords": [],
+            "exclude_keywords": [],
             "sources": [],
             "destinations": []
         }
