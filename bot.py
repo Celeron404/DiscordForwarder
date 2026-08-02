@@ -52,23 +52,26 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
         raise commands.CommandError(
             "Error: Incorrect command usage. Please check optional arguments.\n"
             "`--exact` should be only at the end of the command.\n"
-            "Correct example with argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN> --exact`\n"
-            "Correct example without argument: `?fw addkeyword <section_name> <keyword> <keyword2> <keywordN>`"
+            "Correct example with argument: `?fw addkeyword <section_name> <keyword_sentence> --exact`\n"
+            "Correct example without argument: `?fw addkeyword <section_name> <keyword_sentence>`"
         )
 
     # Check if keywords are already in the lists and add them if not
     keyword = keyword.strip().lower()
+    if "\"" in keyword or "\\" in keyword:
+        await ctx.send("Error: Keyword cannot contain symbols `\"` or `\\`.")
+        return
     if keyword in section["keywords"]:
-        await ctx.send(f"The keyword `{keyword}` is already in the list of section `{section_name}`.")
+        await ctx.send(f"The keyword ``{keyword}`` is already in the list of section `{section_name}`.")
         return
-    elif keyword in section["exact_keywords"]:
-        await ctx.send(f"The keyword `{keyword}` is already in the exact keywords list of section `{section_name}`.")
+    if keyword in section["exact_keywords"]:
+        await ctx.send(f"The keyword ``{keyword}`` is already in the exact keywords list of section `{section_name}`.")
         return
+
+    if exact:
+        section["exact_keywords"].append(keyword)
     else:
-        if exact:
-            section["exact_keywords"].append(keyword)
-        else:
-            section["keywords"].append(keyword)
+        section["keywords"].append(keyword)
 
     save_data(DATA)
     if exact:
