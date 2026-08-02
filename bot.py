@@ -56,7 +56,7 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
             "Correct example without argument: `?fw addkeyword <section_name> <keyword_sentence>`"
         )
 
-    # Check if keywords are already in the lists and add them if not
+    # Check if a keyword is already in the lists and add them if not
     keyword = keyword.strip().lower()
     if "\"" in keyword or "\\" in keyword:
         await ctx.send("Error: Keyword cannot contain symbols `\"` or `\\`.")
@@ -84,33 +84,25 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
 async def remkeyword(ctx, section_name: str, *, keyword: str):
     guild_conf = ensure_guild(ctx.guild.id)
     section = ensure_section(guild_conf, section_name)
-    keywords = keyword.strip().lower().split()
+    keyword = keyword.strip().lower()
 
-    removed_keywords = []
-    exact_removed_keywords = []
-    for k in keywords:
-        keyword_in_list = False
-        if k in section["keywords"]:
-            section["keywords"].remove(k)
-            removed_keywords.append(k)
-            keyword_in_list = True
-        if k in section["exact_keywords"]:
-            section["exact_keywords"].remove(k)
-            exact_removed_keywords.append(k)
-            keyword_in_list = True
-        if not keyword_in_list:
-            await ctx.send(f"The keyword ``{k}`` is not in the list and not in the exact keywords list of section `{section_name}`.")
+    keyword_in_keywords_list = False
+    keyword_in_exact_keywords_list = False
+    if keyword in section["keywords"]:
+        section["keywords"].remove(keyword)
+        keyword_in_keywords_list = True
+    if keyword in section["exact_keywords"]:
+        section["exact_keywords"].remove(keyword)
+        keyword_in_exact_keywords_list = True
+    if not keyword_in_keywords_list and not keyword_in_exact_keywords_list:
+        await ctx.send(f"The keyword ``{keyword}`` is not in the keywords list and not in the exact keywords list of section `{section_name}`.")
 
-    if removed_keywords or exact_removed_keywords:
+    if keyword_in_keywords_list or keyword_in_exact_keywords_list:
         save_data(DATA)
-        msg_to_send = ""
-        if removed_keywords:
-            msg_to_send = f"Removed keyword(s) from section `{section_name}`: " + ", ".join(f"`{k}`" for k in removed_keywords)
-        if exact_removed_keywords:
-            if msg_to_send:
-                msg_to_send += "\n"
-            msg_to_send += f"Removed keyword(s) from exact keywords list of section `{section_name}`: " + ", ".join(f"`{k}`" for k in exact_removed_keywords)
-        await ctx.send(msg_to_send)
+        if keyword_in_keywords_list:
+            await ctx.send(f"Removed keyword from keywords list of section `{section_name}`: ``{keyword}``")
+        else:
+            await ctx.send(f"Removed keyword from exact keywords list of section `{section_name}`: ``{keyword}``")
 
 @bot.command(name="listkeywords", aliases=["lk"])
 async def listkeywords(ctx, section_name: str):
