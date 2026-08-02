@@ -59,6 +59,7 @@ COMMAND_HELP = {
                       "Example: `?fw addkeyword org1 tow --exact`\n"
                       "Now all messages containing the keyword `tow` will be forwarded for section `org1` exactly. Words contains `towel` will not be forwarded.\n",
                       "Same works with sentences, but for whole sentence, not each word insite separately.\n"
+                      "**Note:** Exact sentences will be forwarded if they are not contain any symbols at the start or end of the sentence. `hi, how are you` will be forwarded, but `hi, how are you?` will not be forwarded.\n"
         "aliases": ["ak"]
     },
 

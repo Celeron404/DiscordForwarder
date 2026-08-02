@@ -152,6 +152,7 @@ Below is an example configuration with inline explanations.
    ```
    Bot will forward messages containing exact word `help`. Message contains `helping` will not be forwarded.
    Same will work with sentences, but for whole sentence, not each word insite separately.
+<br>⚠️**Note:** Exact sentences will be forwarded if they are not contain any symbols at the start or end of the sentence. `hi, how are you` will be forwarded, but `hi, how are you?` will not be forwarded.
 
 
 
