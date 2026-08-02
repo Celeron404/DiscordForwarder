@@ -102,21 +102,32 @@ async def remkeyword(ctx, section_name: str, *, keyword: str):
 
     keyword_in_keywords_list = False
     keyword_in_exact_keywords_list = False
+    keyword_in_exclude_keywords_list = False
     if keyword in section["keywords"]:
         section["keywords"].remove(keyword)
         keyword_in_keywords_list = True
     if keyword in section["exact_keywords"]:
         section["exact_keywords"].remove(keyword)
         keyword_in_exact_keywords_list = True
-    if not keyword_in_keywords_list and not keyword_in_exact_keywords_list:
-        await ctx.send(f"The keyword ``{keyword}`` is not in the keywords list and not in the exact keywords list of section `{section_name}`.")
-
-    if keyword_in_keywords_list or keyword_in_exact_keywords_list:
+    if keyword in section["exclude_keywords"]:
+        section["exclude_keywords"].remove(keyword)
+        keyword_in_exclude_keywords_list = True
+    if not keyword_in_keywords_list and not keyword_in_exact_keywords_list and not keyword_in_exclude_keywords_list:
+        await ctx.send(f"The keyword ``{keyword}`` is not in the keywords, exact keywords, and exclude keywords list of section `{section_name}`.")
+    else:
         save_data(DATA)
+        msg_to_send = ""
         if keyword_in_keywords_list:
-            await ctx.send(f"Removed keyword from keywords list of section `{section_name}`: ``{keyword}``")
-        else:
-            await ctx.send(f"Removed keyword from exact keywords list of section `{section_name}`: ``{keyword}``")
+            msg_to_send += f"Removed keyword from keywords list of section `{section_name}`: ``{keyword}``"
+        if keyword_in_exact_keywords_list:
+            if msg_to_send:
+                msg_to_send += "\n"
+            msg_to_send += f"Removed keyword from exact keywords list of section `{section_name}`: ``{keyword}``"
+        if keyword_in_exclude_keywords_list:
+            if msg_to_send:
+                msg_to_send += "\n"
+            msg_to_send += f"Removed keyword from exclude keywords list of section `{section_name}`: ``{keyword}``"
+        await ctx.send(msg_to_send)
 
 @bot.command(name="listkeywords", aliases=["lk"])
 async def listkeywords(ctx, section_name: str):
@@ -124,15 +135,20 @@ async def listkeywords(ctx, section_name: str):
     section = ensure_section(guild_conf, section_name)
     keywords = section["keywords"]
     exact_keywords = section["exact_keywords"]
+    exclude_keywords = section["exclude_keywords"]
 
-    if keywords or exact_keywords:
+    if keywords or exact_keywords or exclude_keywords:
         msg_to_send = ""
         if keywords:
-            msg_to_send = f"Keywords list in section `{section_name}`: " + ", ".join(f"``{k}``" for k in keywords)
+            msg_to_send = f"Keywords list in section `{section_name}`:\n\t" + "\n\t".join(f"``{k}``" for k in keywords)
         if exact_keywords:
             if msg_to_send:
                 msg_to_send += "\n"
-            msg_to_send += f"Exact keywords list in section `{section_name}`: " + ", ".join(f"``{k}``" for k in exact_keywords)
+            msg_to_send += f"Exact keywords list in section `{section_name}`:\n\t" + "\n\t".join(f"``{k}``" for k in exact_keywords)
+        if exclude_keywords:
+            if msg_to_send:
+                msg_to_send += "\n"
+            msg_to_send += f"Exclude keywords list in section `{section_name}`:\n\t" + "\n\t".join(f"``{k}``" for k in exclude_keywords)
         await ctx.send(msg_to_send)
     else:
         await ctx.send(f"The keyword and exact keyword lists in section `{section_name}` are empty.")
