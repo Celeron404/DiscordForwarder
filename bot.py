@@ -333,50 +333,100 @@ async def if_matched(section, content):
     if SEPARATOR_MODE and content.count("\n") > 0:
         content = content.split("\n")
         separator_mode_triggered = True
-    for kw in section["exact_keywords"]:
-        if kw:
-            regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
-            regex = re.compile(regex_pattern)
 
-            if separator_mode_triggered:
-                for line in content:
-                    if INGAME_CHAT_NICK_REMOVER:
-                        if line.endswith("disconnected**"):
-                            continue
-                        line = remove_chat_nickname(line)
+    if separator_mode_triggered:
+        exclude_word_was_found = False
+        for line in content:
+            if INGAME_CHAT_NICK_REMOVER:
+                if line.endswith(" disconnected**"):
+                    continue
+                line = remove_chat_nickname(line)
 
+            for exclude_keyword in section["exclude_keywords"]:
+                if exclude_keyword in line:
+                    exclude_word_was_found = True
+                    break
+            if exclude_word_was_found:
+                continue
+
+            for kw in section["exact_keywords"]:
+                if kw:
+                    regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
+                    regex = re.compile(regex_pattern)
                     if regex.search(line):
                         matched += line + "\n"
-            else:
-                if INGAME_CHAT_NICK_REMOVER:
-                    if content.endswith("disconnected**"):
-                        continue
-                    content = remove_chat_nickname(content)
 
+            for kw in section["keywords"]:
+                if kw and kw in line:
+                    matched += line + "\n"
+
+    else:
+        if INGAME_CHAT_NICK_REMOVER:
+            if content.endswith("disconnected**"):
+                return ""
+            content = remove_chat_nickname(content)
+
+        for exclude_keyword in section["exclude_keywords"]:
+            if exclude_keyword in content:
+                return ""
+
+        for kw in section["exact_keywords"]:
+            if kw:
+                regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
+                regex = re.compile(regex_pattern)
                 if regex.search(content):
                     matched = content
                     break
 
-    # Check for not exact (not strict) keyword match
-    for kw in section["keywords"]:
-        if separator_mode_triggered:
-            for line in content:
-                if INGAME_CHAT_NICK_REMOVER:
-                    if line.endswith("disconnected**"):
-                        continue
-                    line = remove_chat_nickname(line)
-
-                if kw and kw in line:
-                    matched += line + "\n"
-        else:
-            if INGAME_CHAT_NICK_REMOVER:
-                if content.endswith("disconnected**"):
-                    continue
-                content = remove_chat_nickname(content)
-
+        for kw in section["keywords"]:
             if kw and kw in content:
                 matched = content
                 break
+
+    # for kw in section["exact_keywords"]:
+    #     if kw:
+    #         regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
+    #         regex = re.compile(regex_pattern)
+    #
+    #         if separator_mode_triggered:
+    #             for line in content:
+    #                 if INGAME_CHAT_NICK_REMOVER:
+    #                     if line.endswith("disconnected**"):
+    #                         continue
+    #                     line = remove_chat_nickname(line)
+    #
+    #                 if regex.search(line):
+    #                     matched += line + "\n"
+    #         else:
+    #             if INGAME_CHAT_NICK_REMOVER:
+    #                 if content.endswith("disconnected**"):
+    #                     continue
+    #                 content = remove_chat_nickname(content)
+    #
+    #             if regex.search(content):
+    #                 matched = content
+    #                 break
+    #
+    # # Check for not exact (not strict) keyword match
+    # for kw in section["keywords"]:
+    #     if separator_mode_triggered:
+    #         for line in content:
+    #             if INGAME_CHAT_NICK_REMOVER:
+    #                 if line.endswith("disconnected**"):
+    #                     continue
+    #                 line = remove_chat_nickname(line)
+    #
+    #             if kw and kw in line:
+    #                 matched += line + "\n"
+    #     else:
+    #         if INGAME_CHAT_NICK_REMOVER:
+    #             if content.endswith("disconnected**"):
+    #                 continue
+    #             content = remove_chat_nickname(content)
+    #
+    #         if kw and kw in content:
+    #             matched = content
+    #             break
 
     return matched
 
@@ -392,7 +442,6 @@ async def on_message(message):
 
     ctx = await bot.get_context(message)
     if ctx.valid:
-        # Debug
         print(f"Command triggered: {ctx.command.name} by {message.author}")
         return
 
