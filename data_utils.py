@@ -32,4 +32,17 @@ def ensure_section(guild_conf, section_name):
             "destinations": []
         }
         save_data(DATA)
+
+    # Check if all required keys exist. Useful if the data structure changes, for example in new updates.
+    if "keywords" not in guild_conf["sections"][section_name]:
+        guild_conf["sections"][section_name]["keywords"] = []
+    if "exact_keywords" not in guild_conf["sections"][section_name]:
+        guild_conf["sections"][section_name]["exact_keywords"] = []
+    if "exclude_keywords" not in guild_conf["sections"][section_name]:
+        guild_conf["sections"][section_name]["exclude_keywords"] = []
+    if "sources" not in guild_conf["sections"][section_name]:
+        guild_conf["sections"][section_name]["sources"] = []
+    if "destinations" not in guild_conf["sections"][section_name]:
+        guild_conf["destinations"][section_name]["sources"] = []
+
     return guild_conf["sections"][section_name]
