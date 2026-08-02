@@ -2,23 +2,18 @@
   "123456789012345678": {
     "sections": {
       "base41": {
-        "keywords": ["help", "base", "tow"],
+        "keywords": ["base", "tow", "need help"],
+        "exact_keywords": ["request"],
+        "exclude_keywords": ["not need"],
         "sources": ["111111111111111111", "222222222222222222"],
-        "forward_map": {
-          "111111111111111111": "333333333333333333",
-          "222222222222222222": "444444444444444444"
-        },
-        "mode": "all",
-        "subscribers": ["555555555555555555", "666666666666666666"]
+        "destinations": ["333333333333333333", "444444444444444444"]
       },
       "41PD": {
         "keywords": ["help", "police"],
+        "exact_keywords": [],
+        "exclude_keywords": [],
         "sources": ["111111111111111111"],
-        "forward_map": {
-          "111111111111111111": "777777777777777777"
-        },
-        "mode": "forward",
-        "subscribers": []
+        "destinations": ["777777777777777777"]
       }
     }
   },
@@ -27,11 +22,7 @@
       "teamA": {
         "keywords": ["bug", "error"],
         "sources": ["888888888888888888"],
-        "forward_map": {
-          "888888888888888888": "999999999999999999"
-        },
-        "mode": "dm",
-        "subscribers": ["101010101010101010"]
+        "destinations": ["999999999999999999"]
       }
     }
   }
