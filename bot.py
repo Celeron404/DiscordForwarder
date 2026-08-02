@@ -315,7 +315,7 @@ async def if_matched(section, content):
         separator_mode_triggered = True
     for kw in section["exact_keywords"]:
         if kw:
-            regex_pattern = r"\b{kw}\b".format(kw=kw)
+            regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
             regex = re.compile(regex_pattern)
 
             if separator_mode_triggered:
