@@ -311,12 +311,16 @@ async def if_matched(section, content):
             if separator_mode_triggered:
                 for line in content:
                     if INGAME_CHAT_NICK_REMOVER:
+                        if line.endswith("disconnected**"):
+                            continue
                         line = remove_chat_nickname(line)
 
                     if regex.search(line):
                         matched += line + "\n"
             else:
                 if INGAME_CHAT_NICK_REMOVER:
+                    if content.endswith("disconnected**"):
+                        continue
                     content = remove_chat_nickname(content)
 
                 if regex.search(content):
@@ -328,12 +332,16 @@ async def if_matched(section, content):
         if separator_mode_triggered:
             for line in content:
                 if INGAME_CHAT_NICK_REMOVER:
+                    if line.endswith("disconnected**"):
+                        continue
                     line = remove_chat_nickname(line)
 
                 if kw and kw in line:
                     matched += line + "\n"
         else:
             if INGAME_CHAT_NICK_REMOVER:
+                if content.endswith("disconnected**"):
+                    continue
                 content = remove_chat_nickname(content)
 
             if kw and kw in content:
