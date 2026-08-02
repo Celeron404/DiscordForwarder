@@ -133,6 +133,7 @@ Below is an example configuration with inline explanations.
 2. **Add a new section for your organization**
    (Handled automatically when first using commands within the guild.)
 
+
 3. **Add keywords for this section (Bot Admin only)** — words or sentences that trigger forwarding:
 
    ```text
@@ -151,9 +152,17 @@ Below is an example configuration with inline explanations.
    ?fw addkeyword organization_section_name1 help --exact
    ```
    Bot will forward messages containing exact word `help`. Message contains `helping` will not be forwarded.
-   Same will work with sentences, but for whole sentence, not each word insite separately.
+   The same will work with sentences, but for a whole sentence, not each word inside the sentence separately.
 <br>⚠️**Note:** Exact sentences will be forwarded if they are not contain any symbols at the start or end of the sentence. `hi, how are you` will be forwarded, but `hi, how are you?` will not be forwarded.
 
+   <br>It is also possible to exclude keywords with optional argument `--exclude` **at the end of the command:**
+    ```text
+   ?fw addkeyword organization_section_name1 error --exclude
+   ```
+   Bot will not forward messages containing exclude word `error` even if it was matched earlier.
+   The same will work with sentences, but for a whole sentence, not each word inside the sentence separately.
+
+    <br>⚠️**Note:** Only one argument can be used at the same time.
 
 
 4. **Add forwarding destinations (Bot Admin only)** — where messages matching keywords or sentences will be forwarded:
