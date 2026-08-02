@@ -1,16 +1,16 @@
 ﻿# Discord Forward Bot
 
-A simple yet powerful **Discord bot** that monitors selected channels and automatically **forwards messages** containing specific keywords to target channels.
+A simple yet powerful **Discord bot** that monitors selected channels and automatically **forwards messages** containing specific keywords or sentences to target channels.
 Supports **multiple independent configurations per server**, making it ideal for organizations that share channels but need different forwarding rules.
 
 ---
 
 ## 🚀 Features
 
-* **Keyword-based message forwarding** — automatically detect messages containing target words.
+* **Keyword-based message forwarding** — automatically detect messages containing target words or sentences.
 * **Different modes of keyword matching**
-    * **Keyword matching** — automatically detect messages containing target words in any form.
-    * **Exact keyword matching** — automatically detect messages containing target words written exactly as in the list.
+    * **Keyword matching** — automatically detect messages containing target words or sentences in any form.
+    * **Exact keyword matching** — automatically detect messages containing target words or sentences written exactly as in the list.
 * **Per-guild and per-section configuration** — each server can define multiple independent "sections" with their own filters and destinations.
 * **Multi-channel support** — monitor multiple source channels simultaneously as well as multiple destination channels.
 * **Persistent configuration** — settings stored in `data.json`.
@@ -24,7 +24,7 @@ Supports **multiple independent configurations per server**, making it ideal for
 1. The bot monitors messages in channels listed under `"sources"`.
 2. When a new message is detected:
 
-   * It checks if the content matches any keyword from the `"keywords"` list.
+   * It checks if the content matches any keyword or sentence from the `"keywords"` list.
    * If matched, it forwards the message to the mapped destination channel.
 3. The configuration file (`data.json`) defines all behavior and is automatically updated when admins use bot commands.
 
@@ -42,10 +42,10 @@ Below is an example configuration with inline explanations.
       "org1": {
         "_comment": "Section name for organization #1",
 
-        "keywords": ["urgent", "alert", "meeting"],
+        "keywords": ["urgent", "alert", "meeting", "help i am stuck"],
         "_comment_keywords": "List of words that trigger forwarding if they are written in any form",
         
-        "exact_keywords": ["tow", "help"],
+        "exact_keywords": ["tow"],
         "_comment_exact_keywords": "List of words that trigger forwarding only if they are written exactly as in the list",
 
         "sources": ["111111111111111111", "222222222222222222"],
@@ -57,7 +57,7 @@ Below is an example configuration with inline explanations.
 
       "org2": {
         "_comment": "Another section for organization #2",
-        "keywords": ["urgent", "event"],
+        "keywords": ["urgent", "event", "sentence with a few words"],
         "exact_keywords": ["tow"],
         "sources": ["111111111111111111"],
         "destinations": ["777777777777777777"]        
@@ -71,14 +71,14 @@ Below is an example configuration with inline explanations.
 
 ## 🧠 Terminology
 
-| Term            | Meaning                                                                                                                       |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------------|
-| **Guild**       | A Discord server. Each guild has its own configuration.                                                                       |
-| **Section**     | A subgroup inside a guild’s config. Used to isolate multiple organizations or teams sharing one server.                       |
-| **Source**      | Channel where messages are read.                                                                                              |
+| Term            | Meaning                                                                                                                            |
+|-----------------|------------------------------------------------------------------------------------------------------------------------------------|
+| **Guild**       | A Discord server. Each guild has its own configuration.                                                                            |
+| **Section**     | A subgroup inside a guild’s config. Used to isolate multiple organizations or teams sharing one server.                            |
+| **Source**      | Channel where messages are read.                                                                                                   |
 | **Destination** | Channel where messages are forwarded. <br/>Index based: message from source[n] message will be forwarded to destination[n] channel |
-| **Keyword**     | A trigger word that activates forwarding.                                                                                     |
-| **Admin**       | User who was added to bot admin list and can use protected commands.                                                          |
+| **Keyword**     | A trigger word or sentence that activates forwarding.                                                                              |
+| **Admin**       | User who was added to bot admin list and can use protected commands.                                                               |
 
 ---
 
@@ -131,21 +131,17 @@ Below is an example configuration with inline explanations.
 2. **Add a new section for your organization**
    (Handled automatically when first using commands within the guild.)
 
-3. **Add keywords for this section (Bot Admin only)** — words that trigger forwarding:
+3. **Add keywords for this section (Bot Admin only)** — words or sentences that trigger forwarding:
 
    ```text
    ?fw addkeyword organization_section_name1 urgent
    ?fw addkeyword organization_section_name1 base
-   ?fw addkeyword organization_section_name1 tow
+   ?fw addkeyword organization_section_name1 i need help
    ?fw addkeyword organization_section_name2 urgent
    ?fw addkeyword organization_section_name2 police
    ```
-   
-    Also it is possible to add multiple keywords **separated by space character**:
-    ```text
-   ?fw addkeyword organization_section_name1 urgent base tow
-   ```
-   Bot will forward messages containing any of these keywords in any form: `urgent`, `urgently`, `tow`, `towel`.
+
+   Bot will forward messages containing any of these keywords in any form: `urgent`, `urgently`, `i need help`, `i need help with something` `towel`.
    <br><br>
 
    It is also possible to add exact keywords with optional argument `--exact` **at the end of the command:**
@@ -153,9 +149,11 @@ Below is an example configuration with inline explanations.
    ?fw addkeyword organization_section_name1 help --exact
    ```
    Bot will forward messages containing exact word `help`. Message contains `helping` will not be forwarded.
+   Same will work with sentences, but for whole sentence, not each word insite separately.
 
 
-4. **Add forwarding destinations (Bot Admin only)** — where messages matching keywords will be forwarded:
+
+4. **Add forwarding destinations (Bot Admin only)** — where messages matching keywords or sentences will be forwarded:
 
    ```text
    ?fw addforward organization_section_name1 #channel_name1 #forwarded_channel1
