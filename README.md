@@ -47,6 +47,9 @@ Below is an example configuration with inline explanations.
         
         "exact_keywords": ["tow"],
         "_comment_exact_keywords": "List of words that trigger forwarding only if they are written exactly as in the list",
+        
+        "exclude_keywords": ["admin"],
+        "_comment_exclude_keywords": "List of words of messages that should be ignored even if they are matched",
 
         "sources": ["111111111111111111", "222222222222222222"],
         "_comment_sources": "IDs of channels to monitor",
@@ -59,6 +62,7 @@ Below is an example configuration with inline explanations.
         "_comment": "Another section for organization #2",
         "keywords": ["urgent", "event", "sentence with a few words"],
         "exact_keywords": ["tow"],
+        "exclude_keywords": ["admin"],
         "sources": ["111111111111111111"],
         "destinations": ["777777777777777777"]        
       }
