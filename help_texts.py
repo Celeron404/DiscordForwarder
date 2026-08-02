@@ -7,14 +7,12 @@ These texts are used for ?fw help and ?fw <command> help.
 GENERAL_HELP = """
 **Discord Forward Bot Commands**
 `?fw addkeyword <section_name> <keyword>`
-Add a new keyword to trigger forwarding for specific section. **(Bot Admin Only)**
-Multiple keywords are allowed to be added at once. Space character is used as a separator.
-Optional argument `--exact` **at the end of the command** will make the keyword to be matched exactly.
+Add a new keyword or sentence to trigger forwarding for specific section. **(Bot Admin Only)**
+Optional argument `--exact` **at the end of the command** will make the keyword or sentence to be matched exactly.
 Aliases: `ak`
     
 `?fw remkeyword <section_name> <keyword>`
-Remove a keyword from specific section. **(Bot Admin Only)**
-Multiple keywords are allowed to be removed at once. Space character is used as a separator.
+Remove a keyword or sentence from specific section. **(Bot Admin Only)**
 Aliases: `rk`
     
 `?fw listkeywords <section_name>`
@@ -50,33 +48,34 @@ Will remove an entire section. **Be careful! (Bot Admin Only)**
 COMMAND_HELP = {
     "addkeyword": {
         "help":
-            "`?fw addkeyword <section_name> <keyword>` — Add a new keyword for specific section. **(Bot Admin Only)**\n"
+            "`?fw addkeyword <section_name> <keyword>` — Add a new keyword or sentence for specific section. **(Bot Admin Only)**\n"
                       "Example: `?fw addkeyword org1 urgent`\n"
                       "Now all messages containing the keyword `urgent` will be forwarded for section `org1`\n"
                       "(in case if addforward already configured).\n"
-                      "Multiple keywords are allowed to be added at once. Space character is used as a separator.\n"
-                      "Example: `?fw addkeyword org1 urgent base tow`\n"
-                      "Now all messages containing the keywords `urgent`, `base` and `tow` will be forwarded for section `org1`\n"
-                      "Optional argument `--exact` **at the end of the command** will make the keyword to be matched exactly.\n"
+                      "Sentences are allowed to be added at once.\n"
+                      "Example: `?fw addkeyword org1 help i am stuck`\n"
+                      "Now all messages containing the sentence `help i am stuck` will be forwarded for section `org1`\n"
+                      "Optional argument `--exact` **at the end of the command** will make the keyword or sentence to be matched exactly.\n"
                       "Example: `?fw addkeyword org1 tow --exact`\n"
-                      "Now all messages containing the keyword `tow` will be forwarded for section `org1` exactly. Words contains `towel` will not be forwarded",
+                      "Now all messages containing the keyword `tow` will be forwarded for section `org1` exactly. Words contains `towel` will not be forwarded.\n",
+                      "Same works with sentences, but for whole sentence, not each word insite separately.\n"
         "aliases": ["ak"]
     },
 
     "remkeyword": {
         "help":
-            "`?fw remkeyword <section_name> <keyword>` — Remove an existing keyword from specific section. **(Bot Admin Only)**\n"
+            "`?fw remkeyword <section_name> <keyword>` — Remove an existing keyword or sentence from specific section. **(Bot Admin Only)**\n"
                   "Example: `?fw remkeyword org1 help`\n"
                   "Now all messages containing the keyword `help` will no longer be forwarded for section `org1`\n"
-                  "Multiple keywords are allowed to be removed at once. Space character is used as a separator.\n"
-                  "Example: `?fw remkeyword org1 help base tow`\n"
-                  "Now all messages containing the keywords `help`, `base` and `tow` will no longer be forwarded for section `org1`",
+                  "Same works with sentences\n"
+                  "Example: `?fw remkeyword org1 help i am stuck`\n"
+                  "Now all messages containing the sentence `help i am stuck` will no longer be forwarded for section `org1`",
         "aliases": ["rk"]
     },
 
     "listkeywords": {
         "help":
-            "`?fw listkeywords <section_name>` — Show all keywords for specific section.\n"
+            "`?fw listkeywords <section_name>` — Show all keywords and sentences for specific section.\n"
                   "Example: `?fw listkeywords org1`",
         "aliases": ["lk"]
     },
