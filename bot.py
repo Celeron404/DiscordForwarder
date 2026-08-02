@@ -357,6 +357,12 @@ async def on_message(message):
     if message.author is message.guild.me:
         return
 
+    ctx = await bot.get_context(message)
+    if ctx.valid:
+        # Debug
+        print(f"Command triggered: {ctx.command.name} by {message.author}")
+        return
+
     # Debug
     # print(f"Got message: {message.content}")
 
