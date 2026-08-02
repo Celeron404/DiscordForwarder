@@ -48,11 +48,18 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
     if keyword.endswith("--exact"):
         exact = True
         keyword = keyword.replace("--exact", "")
-    elif "--" in keyword:
+    # Check if flag "--exclude" was received at the end of the command
+    exclude = False
+    if keyword.endswith("--exclude"):
+        exclude = True
+        keyword = keyword.replace("--exclude", "")
+    elif "--" in keyword or exact and exclude:
         raise commands.CommandError(
             "Error: Incorrect command usage. Please check optional arguments.\n"
-            "`--exact` should be only at the end of the command.\n"
+            "`--exact` or `--exclude` should be only at the end of the command.\n"
+            "`--exact` and `--exclude` cannot be used at the same time.\n"
             "Correct example with argument: `?fw addkeyword <section_name> <keyword_sentence> --exact`\n"
+            "or: `?fw addkeyword <section_name> <keyword_sentence> --exclude`\n"
             "Correct example without argument: `?fw addkeyword <section_name> <keyword_sentence>`"
         )
 
@@ -67,15 +74,22 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
     if keyword in section["exact_keywords"]:
         await ctx.send(f"The keyword ``{keyword}`` is already in the exact keywords list of section `{section_name}`.")
         return
+    if keyword in section["exclude_keywords"]:
+        await ctx.send(f"The keyword ``{keyword}`` is already in the exclude keywords list of section `{section_name}`.")
+        return
 
     if exact:
         section["exact_keywords"].append(keyword)
+    elif exclude:
+        section["exclude_keywords"].append(keyword)
     else:
         section["keywords"].append(keyword)
 
     save_data(DATA)
     if exact:
         await ctx.send(f"Added keyword to exact keywords list of section `{section_name}`: ``{keyword}``")
+    elif exclude:
+        await ctx.send(f"Added keyword to exclude keywords list of section `{section_name}`: ``{keyword}``")
     else:
         await ctx.send(f"Added keyword to section `{section_name}`: ``{keyword}``")
 
