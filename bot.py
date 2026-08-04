@@ -340,6 +340,8 @@ async def if_matched(section, content):
             if INGAME_CHAT_NICK_REMOVER:
                 if line.endswith(" disconnected**"):
                     continue
+                if line.endswith(" connected**"):
+                    continue
                 line = remove_chat_nickname(line)
 
             for exclude_keyword in section["exclude_keywords"]:
