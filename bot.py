@@ -37,6 +37,7 @@ def remove_chat_nickname(message: str):
 # -----------------------
 # Сommands
 # -----------------------
+@commands.guild_only()
 @is_admin()
 @bot.command(name="addkeyword", aliases=["ak"])
 async def addkeyword(ctx, section_name: str, *, keyword: str):
@@ -93,6 +94,7 @@ async def addkeyword(ctx, section_name: str, *, keyword: str):
     else:
         await ctx.send(f"Added keyword to section `{section_name}`: ``{keyword}``")
 
+@commands.guild_only()
 @is_admin()
 @bot.command(name="remkeyword", aliases=["rk"])
 async def remkeyword(ctx, section_name: str, *, keyword: str):
@@ -129,6 +131,7 @@ async def remkeyword(ctx, section_name: str, *, keyword: str):
             msg_to_send += f"Removed keyword from exclude keywords list of section `{section_name}`: ``{keyword}``"
         await ctx.send(msg_to_send)
 
+@commands.guild_only()
 @bot.command(name="listkeywords", aliases=["lk"])
 async def listkeywords(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -153,6 +156,7 @@ async def listkeywords(ctx, section_name: str):
     else:
         await ctx.send(f"The keyword and exact keyword lists in section `{section_name}` are empty.")
 
+@commands.guild_only()
 @is_admin()
 @bot.command(name="addforward", aliases=["af"])
 async def addforward(ctx, section_name: str, source: abc.GuildChannel | discord.Thread, destination: abc.GuildChannel | discord.Thread):
@@ -220,6 +224,7 @@ If a destination is provided:
 
 Both lists must stay aligned (same length) after removal.
 """
+@commands.guild_only()
 @is_admin()
 @bot.command(name="remforward", aliases=["rf"])
 async def remforward(ctx, section_name: str, source: abc.GuildChannel | discord.Thread, destination: abc.GuildChannel=None | discord.Thread):
@@ -269,6 +274,7 @@ async def remforward(ctx, section_name: str, source: abc.GuildChannel | discord.
         else:
             await ctx.send(f"Forwarding from {source.mention} to {destination.mention} not found in section `{section_name}`.")
 
+@commands.guild_only()
 @bot.command(name="listforward", aliases=["lf"])
 async def listforward(ctx, section_name: str):
     guild_conf = ensure_guild(ctx.guild.id)
@@ -296,6 +302,7 @@ async def listforward(ctx, section_name: str):
         forward_list_message += f"\nMessages from {source_channel.mention} are forwarding to {destination_channel.mention}"
     await ctx.send(forward_list_message)
 
+@commands.guild_only()
 @is_admin()
 @bot.command(name="listsections", aliases=["ls"])
 async def listsections(ctx):
@@ -306,6 +313,7 @@ async def listsections(ctx):
         return
     await ctx.send("Sections list: `" + "`, `".join(sections.keys()) + "`")
 
+@commands.guild_only()
 @is_admin()
 @bot.command(name="remsection")
 async def remsection(ctx, section_name: str):
@@ -344,21 +352,21 @@ async def if_matched(section, content):
                     continue
                 line = remove_chat_nickname(line)
 
-            for exclude_keyword in section["exclude_keywords"]:
+            for exclude_keyword in section.get("exclude_keywords", []):
                 if exclude_keyword in line:
                     exclude_word_was_found = True
                     break
             if exclude_word_was_found:
                 continue
 
-            for kw in section["exact_keywords"]:
+            for kw in section.get("exact_keywords", []):
                 if kw:
                     regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
                     regex = re.compile(regex_pattern)
                     if regex.search(line):
                         matched += line + "\n"
 
-            for kw in section["keywords"]:
+            for kw in section.get("keywords", []):
                 if kw and kw in line:
                     matched += line + "\n"
 
@@ -368,11 +376,11 @@ async def if_matched(section, content):
                 return ""
             content = remove_chat_nickname(content)
 
-        for exclude_keyword in section["exclude_keywords"]:
+        for exclude_keyword in section.get("exclude_keywords", []):
             if exclude_keyword in content:
                 return ""
 
-        for kw in section["exact_keywords"]:
+        for kw in section.get("exact_keywords", []):
             if kw:
                 regex_pattern = r"(\s{kw}\s)|(\b{kw}\b)".format(kw=kw)
                 regex = re.compile(regex_pattern)
@@ -380,7 +388,7 @@ async def if_matched(section, content):
                     matched = content
                     break
 
-        for kw in section["keywords"]:
+        for kw in section.get("keywords", []):
             if kw and kw in content:
                 matched = content
                 break
@@ -520,6 +528,8 @@ async def on_command_error(ctx, error):
         embed.description = "```Command not found.```"
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("Error: You do not have permission to run this command.")
+    elif isinstance(error, commands.NoPrivateMessage):
+        embed.description = "```This command can only be used in a server, not in DMs.```"
     elif isinstance(error, commands.CheckFailure):
         return
 

@@ -121,6 +121,16 @@ Below is an example configuration with inline explanations.
    INGAME_CHAT_NICK_REMOVER = True
    ```
 
+You can also run this bot in a docker: 
+
+`docker compose up --build -d`
+
+NOTE: If you have an existing data.json you need to copy it to the associated docker volume and restart the docker afterwards:
+  ```
+  docker cp data.json discord-forwarder:/data/data.json
+  docker compose restart
+  ```
+
 ---
 
 ## ⚡ Example Usage

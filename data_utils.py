@@ -43,6 +43,6 @@ def ensure_section(guild_conf, section_name):
     if "sources" not in guild_conf["sections"][section_name]:
         guild_conf["sections"][section_name]["sources"] = []
     if "destinations" not in guild_conf["sections"][section_name]:
-        guild_conf["destinations"][section_name]["sources"] = []
+        guild_conf["sections"][section_name]["destinations"] = []
 
     return guild_conf["sections"][section_name]
