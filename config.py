@@ -7,7 +7,7 @@ import discord
 # Bot configuration
 # -----------------------
 PREFIX = "?fw "  # Command prefix used to trigger bot commands
-DATA_FILE = "data.json"  # Path to JSON file for storing keywords, sources, etc.
+DATA_FILE = os.getenv("DATA_FILE", "data.json")  # Path to JSON file for storing keywords, sources, etc. Override with the DATA_FILE env var (e.g. /data/data.json in Docker).
 SEPARATOR_MODE = True  # If True, messages containing multiple lines will be split into separate lines by the bot and each line will be processed separately.
 INGAME_CHAT_NICK_REMOVER = True # If True, from all messages will be removed "<nickname>: ", for example from message "Dude: Hello everyone" we will get only "Hello everyone" for further filtering. Same for disconnecting message "**<nickname> disconnected**"
 

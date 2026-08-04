@@ -1,0 +1,14 @@
+services:
+  bot:
+    build: .
+    container_name: discord-forwarder
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATA_FILE: /data/data.json
+    volumes:
+      - bot-data:/data
+
+volumes:
+  bot-data:
